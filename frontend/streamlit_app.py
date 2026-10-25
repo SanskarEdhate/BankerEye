@@ -19,12 +19,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Apply global styling stylesheet
-apply_custom_css()
-
-# Render BankerEye Brand Header at Top of Sidebar
-render_sidebar_branding()
-
 # Use Streamlit Navigation with resolved paths and Material icons
 pages = [
     st.Page(FRONTEND_DIR / "Home.py", title="Home", icon=":material/home:", default=True),

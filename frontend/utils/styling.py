@@ -35,18 +35,7 @@ def apply_custom_css():
         color: #0f172a !important;
     }
 
-    /* Hide Streamlit Default Deploy Button, App Toolbar & Header Clutter */
-    [data-testid="stToolbar"],
-    .stDeployButton,
-    [data-testid="stDecoration"],
-    #MainMenu,
-    footer {
-        display: none !important;
-        visibility: hidden !important;
-        height: 0 !important;
-        opacity: 0 !important;
-    }
-
+    /* Streamlit App Header & Toolbar - Keep transparent & pass through clicks except to toolbar buttons */
     [data-testid="stHeader"] {
         background-color: transparent !important;
         border-bottom: none !important;
@@ -54,71 +43,178 @@ def apply_custom_css():
         z-index: 999990 !important;
     }
 
-    /* Sidebar Collapse & Expand Controls (Bulletproof Glyph Rendering - Zero 'keyboard_double' text leaks) */
-    [data-testid="stSidebarCollapsedControl"] {
-        display: flex !important;
+    [data-testid="stToolbar"] {
+        background-color: transparent !important;
+        pointer-events: none !important;
         visibility: visible !important;
-        position: fixed !important;
-        top: 14px !important;
-        left: 14px !important;
-        z-index: 999999 !important;
-        pointer-events: auto !important;
+        display: flex !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"] button,
-    [data-testid="stSidebarCollapseButton"] button,
-    [data-testid="stSidebarCollapseButton"] {
+    /* Hide only unwanted right-hand toolbar clutter: Deploy, Status, MainMenu, Decoration, Footer */
+    .stDeployButton,
+    [data-testid="stDecoration"],
+    #MainMenu,
+    [data-testid="stToolbarActions"],
+    [data-testid="stStatusWidget"],
+    [data-testid="stMainMenu"],
+    header .stActionButton,
+    footer {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+
+    /* =========================================================================
+       SIDEBAR RE-ORDERING (BankerEye Branding at Top of Sidebar)
+       ========================================================================= */
+    [data-testid="stSidebarContent"] {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* 1. Header with collapse button at the very top */
+    [data-testid="stSidebarHeader"] {
+        order: 1 !important;
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        justify-content: flex-end !important;
+        padding: 0.5rem 0.75rem 0.25rem 0.75rem !important;
+    }
+
+    /* 2. BankerEye Branding Card directly below the header */
+    [data-testid="stSidebarUserContent"] {
+        order: 2 !important;
+        padding: 0.25rem 0.5rem 0.5rem 0.5rem !important;
+    }
+
+    /* 3. Navigation page links cleanly below the branding card */
+    [data-testid="stSidebarNav"] {
+        order: 3 !important;
+        padding-top: 0.25rem !important;
+    }
+
+    /* =========================================================================
+       SIDEBAR TOGGLE BUTTONS (Expand & Collapse - Bulletproof Glyph Replacement)
+       ========================================================================= */
+    /* 1. EXPAND SIDEBAR BUTTON (Visible when sidebar is COLLAPSED) */
+    [data-testid="stExpandSidebarButton"],
+    [data-testid="stExpandSidebarButton"] button,
+    button[aria-label="Expand sidebar"],
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] button {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 8px !important;
-        width: 32px !important;
-        height: 32px !important;
-        display: flex !important;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08) !important;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12) !important;
         cursor: pointer !important;
-        transition: all 0.15s ease !important;
-        pointer-events: auto !important;
-        visibility: visible !important;
+        position: fixed !important;
+        top: 14px !important;
+        left: 14px !important;
+        z-index: 9999999 !important;
         padding: 0 !important;
         margin: 0 !important;
+        transition: all 0.15s ease !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"] button:hover,
-    [data-testid="stSidebarCollapseButton"] button:hover,
-    [data-testid="stSidebarCollapseButton"]:hover {
+    [data-testid="stExpandSidebarButton"]:hover,
+    [data-testid="stExpandSidebarButton"] button:hover,
+    button[aria-label="Expand sidebar"]:hover,
+    [data-testid="stSidebarCollapsedControl"]:hover,
+    [data-testid="stSidebarCollapsedControl"] button:hover {
         background-color: #eff6ff !important;
         border-color: #2563eb !important;
         box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
     }
 
-    /* Suppress any raw font text leak (e.g. 'keyboard_double_arrow_right') */
-    [data-testid="stSidebarCollapsedControl"] span,
-    [data-testid="stSidebarCollapsedControl"] button span,
-    [data-testid="stSidebarCollapseButton"] span,
-    [data-testid="stSidebarCollapseButton"] button span {
-        font-size: 0px !important;
-        color: transparent !important;
-        line-height: 0 !important;
-        text-indent: -9999px !important;
-        overflow: hidden !important;
-        display: inline-flex !important;
+    /* 2. COLLAPSE SIDEBAR BUTTON (Visible when sidebar is OPEN) */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapseButton"] button,
+    button[aria-label="Collapse sidebar"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 20px !important;
-        height: 20px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+        cursor: pointer !important;
         position: relative !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transition: all 0.15s ease !important;
     }
 
-    /* Guaranteed crisp chevron replacement via ::after pseudo-element */
-    [data-testid="stSidebarCollapsedControl"] span::after {
+    [data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    button[aria-label="Collapse sidebar"]:hover {
+        background-color: #eff6ff !important;
+        border-color: #2563eb !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
+    }
+
+    /* 3. ZERO-TOLERANCE TEXT LEAK SUPPRESSION
+          Permanently eradicate any raw font ligatures:
+          'keyboard_double_arrow_right' & 'keyboard_double_arrow_left' */
+    [data-testid="stExpandSidebarButton"] span,
+    [data-testid="stExpandSidebarButton"] * span,
+    [data-testid="stSidebarCollapsedControl"] span,
+    [data-testid="stSidebarCollapsedControl"] * span,
+    [data-testid="stSidebarCollapseButton"] span,
+    [data-testid="stSidebarCollapseButton"] * span,
+    button[aria-label="Expand sidebar"] span,
+    button[aria-label="Expand sidebar"] * span,
+    button[aria-label="Collapse sidebar"] span,
+    button[aria-label="Collapse sidebar"] * span {
+        display: none !important;
+        visibility: hidden !important;
+        font-size: 0px !important;
+        line-height: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        color: transparent !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+    }
+
+    /* 4. CRISP CHEVRON PSEUDO-ELEMENTS */
+    /* Avoid duplicate chevrons on container div: */
+    [data-testid="stExpandSidebarButton"]::after,
+    [data-testid="stSidebarCollapseButton"]::after,
+    [data-testid="stSidebarCollapsedControl"]::after {
+        content: none !important;
+    }
+
+    /* Expand button chevron (» points right to open sidebar) */
+    [data-testid="stExpandSidebarButton"] button::after,
+    button[aria-label="Expand sidebar"]::after,
+    [data-testid="stSidebarCollapsedControl"] button::after {
         content: "»" !important;
-        font-size: 20px !important;
+        font-size: 24px !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-weight: 700 !important;
+        font-weight: 800 !important;
         color: #1e293b !important;
-        text-indent: 0 !important;
+        line-height: 1 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -126,15 +222,18 @@ def apply_custom_css():
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
+        pointer-events: none !important;
     }
 
-    [data-testid="stSidebarCollapseButton"] span::after {
+    /* Collapse button chevron (« points left to close sidebar) */
+    [data-testid="stSidebarCollapseButton"] button::after,
+    button[aria-label="Collapse sidebar"]::after {
         content: "«" !important;
         font-size: 20px !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-weight: 700 !important;
+        font-weight: 800 !important;
         color: #1e293b !important;
-        text-indent: 0 !important;
+        line-height: 1 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -142,11 +241,14 @@ def apply_custom_css():
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
+        pointer-events: none !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"] button:hover span::after,
-    [data-testid="stSidebarCollapseButton"] button:hover span::after,
-    [data-testid="stSidebarCollapseButton"]:hover span::after {
+    [data-testid="stExpandSidebarButton"]:hover button::after,
+    button[aria-label="Expand sidebar"]:hover::after,
+    [data-testid="stSidebarCollapsedControl"]:hover button::after,
+    [data-testid="stSidebarCollapseButton"]:hover button::after,
+    button[aria-label="Collapse sidebar"]:hover::after {
         color: #2563eb !important;
     }
 
@@ -770,9 +872,125 @@ def apply_custom_css():
         color: #1d4ed8 !important;
         text-decoration: underline !important;
     }
+
+    /* Home Navigation Cards */
+    .nav-card-inner {
+        padding: 4px 0 10px 0;
+    }
+
+    .nav-icon-badge {
+        font-size: 26px;
+        line-height: 1;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .nav-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 6px;
+        line-height: 1.3;
+    }
+
+    .nav-card-desc {
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.5;
+        min-height: 40px;
+        margin-bottom: 8px;
+    }
+
+    /* Executive BankerEye Sidebar Branding Card */
+    .sidebar-brand-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 10px !important;
+        padding: 12px 14px !important;
+        margin: 0.25rem 0.15rem 0.75rem 0.15rem !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    .sidebar-brand-badge {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    .sidebar-brand-logo {
+        font-size: 22px !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 38px !important;
+        height: 38px !important;
+        background: #eff6ff !important;
+        border: 1px solid #bfdbfe !important;
+        border-radius: 8px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .sidebar-brand-names {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .sidebar-brand-title {
+        font-size: 16px !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    .sidebar-brand-accent {
+        color: #2563eb !important;
+    }
+
+    .sidebar-brand-tagline {
+        font-size: 10.5px !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+        letter-spacing: 0.02em !important;
+        margin-top: 2px !important;
+    }
+
+    .sidebar-brand-divider {
+        height: 1px !important;
+        background: #f1f5f9 !important;
+        margin: 10px 0 8px 0 !important;
+    }
+
+    .sidebar-brand-status {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #16a34a !important;
+    }
+
+    .status-indicator-dot {
+        width: 7px !important;
+        height: 7px !important;
+        border-radius: 50% !important;
+        background-color: #16a34a !important;
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2) !important;
+        display: inline-block !important;
+        flex-shrink: 0 !important;
+    }
     </style>
     """
     st.markdown(custom_css, unsafe_allow_html=True)
+    render_sidebar_branding()
 
 
 def render_sidebar_branding():
