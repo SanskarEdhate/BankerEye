@@ -1,0 +1,46 @@
+{
+  "dataset_name": "Competition Train/Test Split Dataset",
+  "dataset_id": "3_train_test_competition",
+  "primary_file": "train.csv",
+  "description": "Pre-partitioned competitive benchmark split into 22,500 labeled training rows (target: 'subscribe') and 7,500 unlabeled evaluation test rows.",
+  "original_record_count": 30000,
+  "original_column_count": 22,
+  "train_set_records": 22500,
+  "test_set_records": 7500,
+  "cleaned_record_count": 30000,
+  "missing_value_count": 0,
+  "duplicate_count": 0,
+  "removed_row_count": 0,
+  "cleaning_actions": [
+    "Verified zero missing / NaN values in both training and test partitions.",
+    "Verified zero duplicate records across RecordIDs.",
+    "Validated target column 'subscribe' in training partition (19,548 'no' / 2,952 'yes').",
+    "Preserved official competition partition integrity without mixing train and test sets.",
+    "Generated an auxiliary reproducible 80/20 validation split (18,000 train / 4,500 val) for offline tuning."
+  ],
+  "split_method": "Official Competition Partition (22,500 Train / 7,500 Unlabeled Test) + Internal 80/20 Stratified Validation",
+  "random_seed": 42,
+  "train_record_count": 22500,
+  "test_record_count": 7500,
+  "target_distribution_overall": {
+    "no": 19548,
+    "yes": 2952
+  },
+  "target_distribution_validation_train": {
+    "no": 15638,
+    "yes": 2362
+  },
+  "target_distribution_validation_test": {
+    "no": 3910,
+    "yes": 590
+  },
+  "leakage_prevention_policy": "Test partition contains no target labels, preventing any evaluation leakage. Internal validation split strictly isolates feature scaling and imputation on train_val_split.",
+  "timestamp": "2026-10-25T18:49:08.041129",
+  "stages": {
+    "01_Raw_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\01_Raw_Data\\train.csv",
+    "02_Unclean_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\02_Unclean_Data\\train.csv",
+    "03_Clean_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\03_Clean_Data\\train_clean.csv",
+    "04_Train_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\04_Train_Data\\train.csv",
+    "05_Test_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\05_Test_Data\\test.csv"
+  }
+}

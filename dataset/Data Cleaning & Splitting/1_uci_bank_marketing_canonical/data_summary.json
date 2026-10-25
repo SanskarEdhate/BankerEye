@@ -1,0 +1,47 @@
+{
+  "dataset_name": "Canonical UCI Bank Marketing Dataset",
+  "dataset_id": "1_uci_bank_marketing_canonical",
+  "primary_file": "bank-full.csv",
+  "description": "Original benchmark direct marketing campaign dataset from Portuguese banking institution (Moro et al., 2014).",
+  "original_record_count": 45211,
+  "original_column_count": 17,
+  "cleaned_record_count": 45211,
+  "cleaned_column_count": 17,
+  "missing_value_count": 0,
+  "duplicate_count": 0,
+  "removed_row_count": 0,
+  "cleaning_actions": [
+    "Verified zero missing / NaN values across all 17 features.",
+    "Verified zero exact duplicate records across 45,211 rows.",
+    "Validated target column 'y' integrity (39,922 'no' / 5,289 'yes').",
+    "Identified informational 'unknown' categories in job, marital, education, contact, and poutcome.",
+    "Standardized export format with semicolon delimiter matching canonical UCI standard."
+  ],
+  "split_method": "Stratified Shuffle Split (80% Train, 20% Test)",
+  "random_seed": 42,
+  "train_record_count": 36168,
+  "train_percentage": 80.0,
+  "test_record_count": 9043,
+  "test_percentage": 20.0,
+  "target_distribution_overall": {
+    "no": 39922,
+    "yes": 5289
+  },
+  "target_distribution_train": {
+    "no": 31937,
+    "yes": 4231
+  },
+  "target_distribution_test": {
+    "no": 7985,
+    "yes": 1058
+  },
+  "leakage_prevention_policy": "The feature 'duration' is preserved in raw/clean CSVs for data fidelity, but must be strictly excluded from outbound telemarketing predictive training to prevent severe target leakage.",
+  "timestamp": "2026-10-25T18:49:06.117664",
+  "stages": {
+    "01_Raw_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\01_Raw_Data\\bank-full.csv",
+    "02_Unclean_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\02_Unclean_Data\\bank-full.csv",
+    "03_Clean_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\03_Clean_Data\\bank-full_clean.csv",
+    "04_Train_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\04_Train_Data\\train.csv",
+    "05_Test_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\05_Test_Data\\test.csv"
+  }
+}

@@ -1,0 +1,197 @@
+{
+  "status": "ready",
+  "trained_at": "2026-10-25 17:49:40",
+  "total_models": 4,
+  "best_f1_model": "Decision Tree Classifier",
+  "best_roc_auc_model": "Random Forest Classifier",
+  "rankings": {
+    "f1_score": [
+      {
+        "key": "decision_tree",
+        "display_name": "Decision Tree Classifier",
+        "value": 0.3298,
+        "rank": 1
+      },
+      {
+        "key": "random_forest",
+        "display_name": "Random Forest Classifier",
+        "value": 0.2842,
+        "rank": 2
+      },
+      {
+        "key": "logistic_regression",
+        "display_name": "Logistic Regression",
+        "value": 0.2815,
+        "rank": 3
+      },
+      {
+        "key": "knn",
+        "display_name": "K-Nearest Neighbours (KNN)",
+        "value": 0.2781,
+        "rank": 4
+      }
+    ],
+    "roc_auc": [
+      {
+        "key": "random_forest",
+        "display_name": "Random Forest Classifier",
+        "value": 0.8047,
+        "rank": 1
+      },
+      {
+        "key": "logistic_regression",
+        "display_name": "Logistic Regression",
+        "value": 0.7717,
+        "rank": 2
+      },
+      {
+        "key": "knn",
+        "display_name": "K-Nearest Neighbours (KNN)",
+        "value": 0.7369,
+        "rank": 3
+      },
+      {
+        "key": "decision_tree",
+        "display_name": "Decision Tree Classifier",
+        "value": 0.7148,
+        "rank": 4
+      }
+    ],
+    "recall": [
+      {
+        "key": "decision_tree",
+        "display_name": "Decision Tree Classifier",
+        "value": 0.2231,
+        "rank": 1
+      },
+      {
+        "key": "logistic_regression",
+        "display_name": "Logistic Regression",
+        "value": 0.1786,
+        "rank": 2
+      },
+      {
+        "key": "random_forest",
+        "display_name": "Random Forest Classifier",
+        "value": 0.1786,
+        "rank": 3
+      },
+      {
+        "key": "knn",
+        "display_name": "K-Nearest Neighbours (KNN)",
+        "value": 0.1767,
+        "rank": 4
+      }
+    ],
+    "accuracy": [
+      {
+        "key": "random_forest",
+        "display_name": "Random Forest Classifier",
+        "value": 0.8947,
+        "rank": 1
+      },
+      {
+        "key": "decision_tree",
+        "display_name": "Decision Tree Classifier",
+        "value": 0.894,
+        "rank": 2
+      },
+      {
+        "key": "logistic_regression",
+        "display_name": "Logistic Regression",
+        "value": 0.8933,
+        "rank": 3
+      },
+      {
+        "key": "knn",
+        "display_name": "K-Nearest Neighbours (KNN)",
+        "value": 0.8926,
+        "rank": 4
+      }
+    ],
+    "precision": [
+      {
+        "key": "random_forest",
+        "display_name": "Random Forest Classifier",
+        "value": 0.6949,
+        "rank": 1
+      },
+      {
+        "key": "logistic_regression",
+        "display_name": "Logistic Regression",
+        "value": 0.6632,
+        "rank": 2
+      },
+      {
+        "key": "knn",
+        "display_name": "K-Nearest Neighbours (KNN)",
+        "value": 0.6516,
+        "rank": 3
+      },
+      {
+        "key": "decision_tree",
+        "display_name": "Decision Tree Classifier",
+        "value": 0.6327,
+        "rank": 4
+      }
+    ]
+  },
+  "models_summary": {
+    "logistic_regression": {
+      "display_name": "Logistic Regression",
+      "metrics": {
+        "accuracy": 0.8933,
+        "precision": 0.6632,
+        "recall": 0.1786,
+        "f1_score": 0.2815,
+        "roc_auc": 0.7717
+      },
+      "timing": {
+        "training_time_sec": 0.362,
+        "prediction_time_sec": 0.0297
+      }
+    },
+    "decision_tree": {
+      "display_name": "Decision Tree Classifier",
+      "metrics": {
+        "accuracy": 0.894,
+        "precision": 0.6327,
+        "recall": 0.2231,
+        "f1_score": 0.3298,
+        "roc_auc": 0.7148
+      },
+      "timing": {
+        "training_time_sec": 0.289,
+        "prediction_time_sec": 0.0285
+      }
+    },
+    "knn": {
+      "display_name": "K-Nearest Neighbours (KNN)",
+      "metrics": {
+        "accuracy": 0.8926,
+        "precision": 0.6516,
+        "recall": 0.1767,
+        "f1_score": 0.2781,
+        "roc_auc": 0.7369
+      },
+      "timing": {
+        "training_time_sec": 0.1,
+        "prediction_time_sec": 3.0703
+      }
+    },
+    "random_forest": {
+      "display_name": "Random Forest Classifier",
+      "metrics": {
+        "accuracy": 0.8947,
+        "precision": 0.6949,
+        "recall": 0.1786,
+        "f1_score": 0.2842,
+        "roc_auc": 0.8047
+      },
+      "timing": {
+        "training_time_sec": 1.364,
+        "prediction_time_sec": 0.1017
+      }
+    }
+  }
+}

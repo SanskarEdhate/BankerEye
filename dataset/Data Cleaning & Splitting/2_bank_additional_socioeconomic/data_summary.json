@@ -1,0 +1,46 @@
+{
+  "dataset_name": "Socioeconomic Extended Dataset (bank-additional)",
+  "dataset_id": "2_bank_additional_socioeconomic",
+  "primary_file": "bank-additional-full.csv",
+  "description": "Enriched dataset with 5 macroeconomic indicators: Euribor 3M, Consumer Price Index, Consumer Confidence Index, Employment Variation Rate, and Number of Employees.",
+  "original_record_count": 41188,
+  "original_column_count": 21,
+  "cleaned_record_count": 41176,
+  "cleaned_column_count": 21,
+  "missing_value_count": 0,
+  "duplicate_count": 12,
+  "removed_row_count": 12,
+  "cleaning_actions": [
+    "Detected and eliminated 12 redundant duplicate observations (reduced from 41,188 to 41,176 records).",
+    "Verified zero missing / NaN values across all 21 feature and target columns.",
+    "Validated target column 'y' balance: 36,537 'no' (88.73%) vs. 4,639 'yes' (11.27%).",
+    "Preserved float64 precision on macroeconomic indicators (emp.var.rate, cons.price.idx, cons.conf.idx, euribor3m, nr.employed)."
+  ],
+  "split_method": "Stratified Shuffle Split (80% Train, 20% Test)",
+  "random_seed": 42,
+  "train_record_count": 32940,
+  "train_percentage": 80.0,
+  "test_record_count": 8236,
+  "test_percentage": 20.0,
+  "target_distribution_overall": {
+    "no": 36537,
+    "yes": 4639
+  },
+  "target_distribution_train": {
+    "no": 29229,
+    "yes": 3711
+  },
+  "target_distribution_test": {
+    "no": 7308,
+    "yes": 928
+  },
+  "leakage_prevention_policy": "Call duration is excluded during predictive modeling. Macroeconomic indicators reflect monthly/quarterly lagged national statistics, valid for pre-campaign macroeconomic context.",
+  "timestamp": "2026-10-25T18:49:07.200163",
+  "stages": {
+    "01_Raw_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\01_Raw_Data\\bank-additional-full.csv",
+    "02_Unclean_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\02_Unclean_Data\\bank-additional-full.csv",
+    "03_Clean_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\03_Clean_Data\\bank-additional-full_clean.csv",
+    "04_Train_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\04_Train_Data\\train.csv",
+    "05_Test_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\05_Test_Data\\test.csv"
+  }
+}
