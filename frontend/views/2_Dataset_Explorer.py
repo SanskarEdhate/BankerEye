@@ -14,7 +14,6 @@ if "frontend.utils.api_client" in sys.modules:
     import frontend.utils.api_client
     importlib.reload(frontend.utils.api_client)
 
-from frontend.utils.styling import apply_custom_css
 from frontend.utils.api_client import (
     check_api_health,
     get_dataset_summary,
@@ -31,7 +30,6 @@ try:
     st.set_page_config(page_title="Dataset Explorer | BankerEye ML", page_icon="🔍", layout="wide")
 except Exception:
     pass
-apply_custom_css()
 
 st.markdown(
     """

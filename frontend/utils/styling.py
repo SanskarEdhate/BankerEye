@@ -82,15 +82,30 @@ def apply_custom_css():
     }
 
     /* =========================================================================
-       SIDEBAR RE-ORDERING (Header & BankerEye Branding at Top of Sidebar)
+       SIDEBAR CONTAINER & FLEX ORDER HIERARCHY
        ========================================================================= */
-    [data-testid="stSidebarContent"] {
-        display: flex !important;
-        flex-direction: column !important;
-        padding-top: 0.25rem !important;
+    section[data-testid="stSidebar"] {
+        width: 280px !important;
+        min-width: 280px !important;
+        max-width: 280px !important;
+        background-color: #ffffff !important;
+        border-right: 1px solid #e2e8f0 !important;
+        box-shadow: none !important;
     }
 
-    /* All direct children default to order: 10 so nav links sit below header & brand card */
+    [data-testid="stSidebarContent"] {
+        width: 280px !important;
+        padding: 16px !important;
+        background-color: #ffffff !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        min-height: 100vh !important;
+        gap: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* All direct children default to order: 10 */
     [data-testid="stSidebarContent"] > * {
         order: 10 !important;
     }
@@ -104,8 +119,9 @@ def apply_custom_css():
         opacity: 1 !important;
         justify-content: flex-end !important;
         align-items: center !important;
-        padding: 0.5rem 0.75rem 0.25rem 0.75rem !important;
-        min-height: 40px !important;
+        padding: 0 0 10px 0 !important;
+        min-height: 36px !important;
+        background: transparent !important;
     }
 
     /* Force collapse button wrapper to be visible */
@@ -123,17 +139,33 @@ def apply_custom_css():
         height: 0 !important;
     }
 
-    /* 2. BankerEye Branding Card directly below the header */
+    /* Unbox User Content container so brand card & footer position seamlessly */
     [data-testid="stSidebarContent"] > [data-testid="stSidebarUserContent"],
     [data-testid="stSidebarUserContent"] {
+        display: contents !important;
+    }
+
+    /* 2. Brand Card: pinned directly below collapse header */
+    .st-key-sidebar-brand {
         order: 2 !important;
-        padding: 0.25rem 0.5rem 0.5rem 0.5rem !important;
+        width: 100% !important;
+        margin-bottom: 2px !important;
     }
 
     /* 3. Navigation page links cleanly below the branding card */
-    [data-testid="stSidebarNav"] {
-        order: 10 !important;
-        padding-top: 0.25rem !important;
+    [data-testid="stSidebarNav"],
+    [data-testid="stSidebarContent"] > div:has([data-testid="stSidebarNav"]) {
+        order: 3 !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* 4. Footer pinned to bottom of sidebar */
+    .st-key-sidebar-footer {
+        order: 100 !important;
+        margin-top: auto !important;
+        width: 100% !important;
     }
 
     /* =========================================================================
@@ -361,53 +393,102 @@ def apply_custom_css():
     section[data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-right: 1px solid #e2e8f0 !important;
-        box-shadow: 2px 0 12px rgba(15, 23, 42, 0.03) !important;
+        box-shadow: none !important;
     }
 
+    /* Platform Navigation Section Header */
     [data-testid="stSidebarNav"]::before {
         content: "PLATFORM NAVIGATION" !important;
         display: block !important;
-        font-size: 10.5px !important;
+        font-size: 11px !important;
         font-weight: 700 !important;
         color: #94a3b8 !important;
         letter-spacing: 0.08em !important;
         text-transform: uppercase !important;
-        padding: 6px 12px 6px 12px !important;
+        margin-top: 16px !important;
+        margin-bottom: 8px !important;
+        padding: 0 12px !important;
     }
 
-    section[data-testid="stSidebar"] .stCaption, 
-    section[data-testid="stSidebar"] small {
-        color: #64748b !important;
+    [data-testid="stSidebarNav"] ul {
+        padding: 0 !important;
+        margin: 0 !important;
+        list-style: none !important;
     }
 
-    section[data-testid="stSidebar"] hr {
-        border-color: #e2e8f0 !important;
-        margin: 12px 0 !important;
+    [data-testid="stSidebarNav"] li {
+        margin-bottom: 2px !important;
     }
 
-    /* Sidebar Navigation Links */
-    [data-testid="stSidebarNav"] a {
-        border-radius: 8px !important;
-        padding: 9px 12px !important;
-        margin: 2px 0 !important;
-        transition: all 0.15s ease-in-out !important;
-        font-weight: 600 !important;
-        font-size: 13.5px !important;
+    /* Modern 40px Banking-Grade Nav Links */
+    [data-testid="stSidebarNav"] a,
+    [data-testid="stSidebarNavLink"] {
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        border-radius: 10px !important;
+        padding: 0 12px !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #334155 !important;
+        text-decoration: none !important;
+        transition: all 150ms ease-in-out !important;
+        background-color: transparent !important;
+        border-left: 3px solid transparent !important;
+        box-sizing: border-box !important;
     }
 
+    [data-testid="stSidebarNav"] a span {
+        transition: all 150ms ease-in-out !important;
+    }
+
+    /* Nav Item Icon (18px, Material symbols / Emojis) */
+    [data-testid="stSidebarNav"] a span[data-testid="stIconMaterial"],
+    [data-testid="stSidebarNav"] a svg,
+    [data-testid="stSidebarNav"] a span:first-child {
+        font-size: 18px !important;
+        width: 18px !important;
+        height: 18px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Nav Item Label Text */
+    [data-testid="stSidebarNav"] a span:last-child {
+        font-size: 14px !important;
+        font-weight: inherit !important;
+        color: inherit !important;
+        line-height: 1.2 !important;
+    }
+
+    /* Hover State */
     [data-testid="stSidebarNav"] a:hover {
         background-color: #f1f5f9 !important;
         color: #0f172a !important;
     }
 
+    [data-testid="stSidebarNav"] a:hover span {
+        color: #0f172a !important;
+    }
+
+    /* Active State */
     [data-testid="stSidebarNav"] a[aria-current="page"] {
         background-color: #eff6ff !important;
+        color: #1d4ed8 !important;
         border-left: 3px solid #2563eb !important;
+        font-weight: 600 !important;
     }
 
     [data-testid="stSidebarNav"] a[aria-current="page"] span {
         color: #1d4ed8 !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
     }
 
     /* Executive Navy Gradient Banner */
@@ -822,74 +903,80 @@ def apply_custom_css():
         margin-bottom: 8px;
     }
 
-    /* Executive BankerEye Sidebar Branding Card */
+    /* Executive BankerEye Compact Sidebar Brand Card */
     .sidebar-brand-card {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 10px !important;
         padding: 12px 14px !important;
-        margin: 0.25rem 0.15rem 0.75rem 0.15rem !important;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+        margin: 0 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+        box-sizing: border-box !important;
     }
 
-    .sidebar-brand-badge {
+    .sidebar-brand-header {
         display: flex !important;
         align-items: center !important;
         gap: 10px !important;
     }
 
-    .sidebar-brand-logo {
-        font-size: 22px !important;
-        line-height: 1 !important;
+    .sidebar-brand-logo-tile {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 10px !important;
+        background: #eff6ff !important;
+        border: 1px solid #dbeafe !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 38px !important;
-        height: 38px !important;
-        background: #eff6ff !important;
-        border: 1px solid #bfdbfe !important;
-        border-radius: 8px !important;
         flex-shrink: 0 !important;
     }
 
-    .sidebar-brand-names {
+    .sidebar-brand-text {
         display: flex !important;
         flex-direction: column !important;
+        min-width: 0 !important;
     }
 
     .sidebar-brand-title {
         font-size: 16px !important;
-        font-weight: 800 !important;
+        font-weight: 700 !important;
         color: #0f172a !important;
         line-height: 1.2 !important;
-        letter-spacing: -0.01em !important;
+        letter-spacing: -0.02em !important;
     }
 
     .sidebar-brand-accent {
         color: #2563eb !important;
+        font-weight: 800 !important;
     }
 
     .sidebar-brand-tagline {
-        font-size: 10.5px !important;
-        font-weight: 600 !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
         color: #64748b !important;
-        letter-spacing: 0.02em !important;
+        line-height: 1.2 !important;
         margin-top: 2px !important;
+        white-space: nowrap !important;
     }
 
     .sidebar-brand-divider {
         height: 1px !important;
         background: #f1f5f9 !important;
-        margin: 10px 0 8px 0 !important;
+        margin: 10px 0 !important;
+        border: none !important;
     }
 
     .sidebar-brand-status {
         display: flex !important;
         align-items: center !important;
-        gap: 6px !important;
+        gap: 8px !important;
         font-size: 11px !important;
         font-weight: 600 !important;
         color: #16a34a !important;
+        line-height: 1 !important;
     }
 
     .status-indicator-dot {
@@ -897,23 +984,92 @@ def apply_custom_css():
         height: 7px !important;
         border-radius: 50% !important;
         background-color: #16a34a !important;
-        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2) !important;
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4) !important;
         display: inline-block !important;
         flex-shrink: 0 !important;
+        animation: status-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1) !important;
+    }
+
+    @keyframes status-pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
+        }
+        70% {
+            box-shadow: 0 0 0 5px rgba(22, 163, 74, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .status-indicator-dot {
+            animation: none !important;
+            box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
+        }
+        [data-testid="stSidebarNav"] a {
+            transition: none !important;
+        }
+    }
+
+    /* Pinned Sidebar Footer */
+    .sidebar-footer-card {
+        width: 100% !important;
+        margin-top: auto !important;
+        padding-top: 14px !important;
+        box-sizing: border-box !important;
+    }
+
+    .sidebar-footer-divider {
+        height: 1px !important;
+        background: #e2e8f0 !important;
+        margin-bottom: 10px !important;
+        border: none !important;
+    }
+
+    .sidebar-footer-meta {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 3px !important;
+        padding: 0 4px !important;
+    }
+
+    .sidebar-footer-version {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+        line-height: 1.3 !important;
+    }
+
+    .sidebar-footer-copy {
+        font-size: 11px !important;
+        font-weight: 400 !important;
+        color: #94a3b8 !important;
+        line-height: 1.3 !important;
     }
     </style>
     """
     st.markdown(custom_css, unsafe_allow_html=True)
-    render_sidebar_branding()
 
 
 def render_sidebar_branding():
-    """Renders executive BankerEye branding card at the top of the sidebar."""
+    """Renders compact executive BankerEye branding card at top of sidebar."""
     branding_html = """
     <div class="sidebar-brand-card">
-        <div class="sidebar-brand-badge">
-            <div class="sidebar-brand-logo">🏦</div>
-            <div class="sidebar-brand-names">
+        <div class="sidebar-brand-header">
+            <div class="sidebar-brand-logo-tile">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18"/>
+                    <path d="M3 10h18"/>
+                    <path d="M12 3L2 10h20L12 3z"/>
+                    <path d="M6 10v7"/>
+                    <path d="M10 10v7"/>
+                    <path d="M14 10v7"/>
+                    <path d="M18 10v7"/>
+                    <circle cx="12" cy="13.5" r="1.5" fill="#2563eb"/>
+                </svg>
+            </div>
+            <div class="sidebar-brand-text">
                 <div class="sidebar-brand-title">Banker<span class="sidebar-brand-accent">Eye</span></div>
                 <div class="sidebar-brand-tagline">Term Deposit Intelligence</div>
             </div>
@@ -925,5 +1081,19 @@ def render_sidebar_branding():
         </div>
     </div>
     """
-    st.sidebar.markdown(branding_html, unsafe_allow_html=True)
+    st.markdown(branding_html, unsafe_allow_html=True)
+
+
+def render_sidebar_footer():
+    """Renders small muted metadata and copyright footer pinned to bottom of sidebar."""
+    footer_html = """
+    <div class="sidebar-footer-card">
+        <div class="sidebar-footer-divider"></div>
+        <div class="sidebar-footer-meta">
+            <div class="sidebar-footer-version">v1.0.0 &bull; Enterprise ML</div>
+            <div class="sidebar-footer-copy">&copy; BankerEye</div>
+        </div>
+    </div>
+    """
+    st.markdown(footer_html, unsafe_allow_html=True)
 

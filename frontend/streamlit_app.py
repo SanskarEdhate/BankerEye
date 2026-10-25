@@ -9,7 +9,11 @@ FRONTEND_DIR = Path(__file__).resolve().parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-from frontend.utils.styling import apply_custom_css, render_sidebar_branding
+from frontend.utils.styling import (
+    apply_custom_css,
+    render_sidebar_branding,
+    render_sidebar_footer,
+)
 
 # Set root application configuration
 st.set_page_config(
@@ -19,8 +23,16 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Apply global styling stylesheet
+# 1. Single source of truth: Inject global styling once
 apply_custom_css()
+
+# 2. Render sidebar brand card and pinned footer once in keyed containers
+with st.sidebar:
+    with st.container(key="sidebar-brand"):
+        render_sidebar_branding()
+
+    with st.container(key="sidebar-footer"):
+        render_sidebar_footer()
 
 # Use Streamlit Navigation with resolved paths and Material icons
 pages = [
