@@ -40,15 +40,18 @@ def main():
         d.mkdir(parents=True, exist_ok=True)
 
     src_canonical = DATASET_DIR / "1_uci_bank_marketing_canonical"
+    if not src_canonical.exists():
+        src_canonical = raw_dir1
     full_canonical_src = src_canonical / "bank-full.csv"
     sample_canonical_src = src_canonical / "bank.csv"
     names_canonical_src = src_canonical / "bank-names.txt"
 
     # 01_Raw_Data: preserve exact copies
-    shutil.copy2(full_canonical_src, raw_dir1 / "bank-full.csv")
-    shutil.copy2(sample_canonical_src, raw_dir1 / "bank.csv")
-    if names_canonical_src.exists():
-        shutil.copy2(names_canonical_src, raw_dir1 / "bank-names.txt")
+    if src_canonical != raw_dir1:
+        shutil.copy2(full_canonical_src, raw_dir1 / "bank-full.csv")
+        shutil.copy2(sample_canonical_src, raw_dir1 / "bank.csv")
+        if names_canonical_src.exists():
+            shutil.copy2(names_canonical_src, raw_dir1 / "bank-names.txt")
 
     # 02_Unclean_Data: copy prior to cleaning
     shutil.copy2(full_canonical_src, unclean_dir1 / "bank-full.csv")
@@ -165,15 +168,18 @@ def main():
         d.mkdir(parents=True, exist_ok=True)
 
     src_additional = DATASET_DIR / "2_bank_additional_socioeconomic"
+    if not src_additional.exists():
+        src_additional = raw_dir2
     full_add_src = src_additional / "bank-additional-full.csv"
     samp_add_src = src_additional / "bank-additional.csv"
     names_add_src = src_additional / "bank-additional-names.txt"
 
     # 01_Raw_Data: preserve exact copies
-    shutil.copy2(full_add_src, raw_dir2 / "bank-additional-full.csv")
-    shutil.copy2(samp_add_src, raw_dir2 / "bank-additional.csv")
-    if names_add_src.exists():
-        shutil.copy2(names_add_src, raw_dir2 / "bank-additional-names.txt")
+    if src_additional != raw_dir2:
+        shutil.copy2(full_add_src, raw_dir2 / "bank-additional-full.csv")
+        shutil.copy2(samp_add_src, raw_dir2 / "bank-additional.csv")
+        if names_add_src.exists():
+            shutil.copy2(names_add_src, raw_dir2 / "bank-additional-names.txt")
 
     # 02_Unclean_Data: copy prior to cleaning
     shutil.copy2(full_add_src, unclean_dir2 / "bank-additional-full.csv")
@@ -290,17 +296,20 @@ def main():
         d.mkdir(parents=True, exist_ok=True)
 
     src_comp = DATASET_DIR / "3_train_test_competition"
+    if not src_comp.exists():
+        src_comp = raw_dir3
     train_src = src_comp / "train.csv"
     test_src = src_comp / "test.csv"
     sub_src = src_comp / "sample_submission.csv"
     desc_src = src_comp / "data description.txt"
 
     # 01_Raw_Data: preserve exact copies
-    shutil.copy2(train_src, raw_dir3 / "train.csv")
-    shutil.copy2(test_src, raw_dir3 / "test.csv")
-    shutil.copy2(sub_src, raw_dir3 / "sample_submission.csv")
-    if desc_src.exists():
-        shutil.copy2(desc_src, raw_dir3 / "data description.txt")
+    if src_comp != raw_dir3:
+        shutil.copy2(train_src, raw_dir3 / "train.csv")
+        shutil.copy2(test_src, raw_dir3 / "test.csv")
+        shutil.copy2(sub_src, raw_dir3 / "sample_submission.csv")
+        if desc_src.exists():
+            shutil.copy2(desc_src, raw_dir3 / "data description.txt")
 
     # 02_Unclean_Data: copy prior to cleaning
     shutil.copy2(train_src, unclean_dir3 / "train.csv")

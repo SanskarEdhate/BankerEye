@@ -22,7 +22,7 @@ def test_resolve_dataset_path_valid():
     """Verify default candidate dataset exists and is located correctly."""
     ds_path = resolve_dataset_path()
     assert ds_path.exists()
-    assert ds_path.name in ["bank-full.csv", "bank.csv"]
+    assert ds_path.name in ["bank-full.csv", "bank.csv", "bank-full_clean.csv"]
 
 
 def test_resolve_dataset_path_missing():

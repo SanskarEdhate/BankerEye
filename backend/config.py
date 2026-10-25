@@ -18,13 +18,10 @@ REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Default primary dataset candidate files
 DATASET_CANDIDATES = [
-    DATASET_DIR / "1_uci_bank_marketing_canonical" / "bank-full.csv",
     DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "03_Clean_Data" / "bank-full_clean.csv",
-    DATASET_DIR / "bank-full.csv",
-    DATASET_DIR / "1_uci_bank_marketing_canonical" / "bank.csv",
-    DATASET_DIR / "bank.csv",
-    DATASET_DIR / "3_train_test_competition" / "train.csv",
-    DATASET_DIR / "2_bank_additional_socioeconomic" / "bank-additional-full.csv",
+    DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "01_Raw_Data" / "bank-full.csv",
+    DATASET_DIR / "Data Cleaning & Splitting" / "3_train_test_competition" / "04_Train_Data" / "train.csv",
+    DATASET_DIR / "Data Cleaning & Splitting" / "2_bank_additional_socioeconomic" / "03_Clean_Data" / "bank-additional-full_clean.csv",
 ]
 
 

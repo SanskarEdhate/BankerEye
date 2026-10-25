@@ -129,9 +129,12 @@ def get_available_datasets_list() -> List[Dict[str, Any]]:
     ]
 
     for item in dataset_folders:
-        dir_path = DATASET_DIR / item["folder"]
+        dir_path = DATASET_DIR / "Data Cleaning & Splitting" / item["folder"]
+        if not dir_path.exists():
+            dir_path = DATASET_DIR / item["folder"]
+
         if dir_path.exists():
-            files = [f.name for f in dir_path.iterdir() if f.is_file()]
+            files = [f.name for f in dir_path.rglob("*") if f.is_file() and not f.name.endswith(".json")]
             catalog.append({
                 "folder": item["folder"],
                 "name": item["name"],
