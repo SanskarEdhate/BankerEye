@@ -49,13 +49,21 @@ FLASK_DEBUG = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "yes")
 DEFAULT_TEST_SIZE = 0.20
 RANDOM_STATE = 42
 
+# ==============================================================================
+# FEATURE SCHEMA & ANTI-LEAKAGE BREAKDOWN:
+# - Total columns in dataset: 17 (16 features + 1 target 'y')
+# - Target variable: 'y' (binary: 'yes' / 'no', deposit subscribed)
+# - Excluded feature: 'duration' (call duration in seconds; excluded for anti-leakage)
+# - Input features used for ML prediction: 15 (6 numerical + 9 categorical)
+# ==============================================================================
+
 # Target column name
 TARGET_COLUMN = "y"
 
 # Explicitly excluded columns for main prediction experiment (anti-leakage requirement)
 EXCLUDED_FEATURES_MAIN = ["duration"]
 
-# Expected features for validation
+# Expected input features for model training and validation (15 features total: 6 numerical + 9 categorical)
 NUMERICAL_FEATURES = ["age", "balance", "day", "campaign", "pdays", "previous"]
 CATEGORICAL_FEATURES = [
     "job", "marital", "education", "default", "housing", "loan", 

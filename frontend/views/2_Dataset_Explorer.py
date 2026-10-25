@@ -62,7 +62,7 @@ s1, s2, s3, s4 = st.columns(4)
 with s1:
     render_kpi_card("Total Observations", f"{summary.get('total_rows', 0):,}", "bank-full.csv records", "UCI Benchmark", "info")
 with s2:
-    render_kpi_card("Total Columns", str(summary.get("total_columns", 0)), "16 features + 1 target", "Semicolon Delimited", "info")
+    render_kpi_card("Total Columns", str(summary.get("total_columns", 0)), "16 features + 1 target (15 used in ML)", "17 Columns", "info")
 with s3:
     render_kpi_card("Missing Cells", str(summary.get("total_missing_cells", 0)), "0 null / NaN values", "Verified Clean", "success")
 with s4:
@@ -245,7 +245,7 @@ with tab_folders:
         """
         <div class="info-callout">
             <strong>Dataset Organization Summary:</strong><br>
-            • <strong>1_uci_bank_marketing_canonical/</strong>: The standard 45,211 row benchmark dataset (Moro et al.) with 17 attributes and target <code>y</code>.<br>
+            • <strong>1_uci_bank_marketing_canonical/</strong>: The standard 45,211 row benchmark dataset (Moro et al.) with 17 total columns (16 features + 1 target <code>y</code>; 15 input features used in ML models excluding <code>duration</code>).<br>
             • <strong>2_bank_additional_socioeconomic/</strong>: 41,188 records enriched with 5 national macroeconomic indicators (Euribor 3M, Consumer Price Index, Employment Variation Rate).<br>
             • <strong>3_train_test_competition/</strong>: ML competition partition pre-split into <code>train.csv</code> (22,501 labeled records with <code>subscribe</code> target) and <code>test.csv</code> (7,501 unlabeled records) with sample submission.
         </div>
@@ -281,26 +281,32 @@ with tab_preview:
 
 # ----------------- TAB 2: SCHEMA & TYPES -----------------
 with tab_schema:
-    st.markdown("#### Feature Schema & Data Dictionary")
+    st.markdown("#### Feature Schema & Data Dictionary (16 Features + 1 Target = 17 Columns)")
+    st.caption(
+        "The canonical dataset contains 17 columns: 16 feature columns and 1 target column (<code>y</code>). "
+        "During ML model training, exactly 15 input features are used (6 numerical + 9 categorical) "
+        "after strictly excluding <code>duration</code> to prevent target leakage.",
+        unsafe_allow_html=True,
+    )
     
     schema_data = [
-        {"Feature": "age", "Type": "Numeric (int64)", "Description": "Client age in years (Range: 18 - 95)"},
-        {"Feature": "job", "Type": "Categorical (object)", "Description": "Type of employment (management, technician, blue-collar, etc.)"},
-        {"Feature": "marital", "Type": "Categorical (object)", "Description": "Marital status (married, single, divorced/widowed)"},
-        {"Feature": "education", "Type": "Categorical (object)", "Description": "Education level (primary, secondary, tertiary, unknown)"},
-        {"Feature": "default", "Type": "Binary (object)", "Description": "Has credit in default? ('no', 'yes')"},
-        {"Feature": "balance", "Type": "Numeric (int64)", "Description": "Average yearly account balance in Euros"},
-        {"Feature": "housing", "Type": "Binary (object)", "Description": "Has housing loan obligation? ('no', 'yes')"},
-        {"Feature": "loan", "Type": "Binary (object)", "Description": "Has personal loan obligation? ('no', 'yes')"},
-        {"Feature": "contact", "Type": "Categorical (object)", "Description": "Contact communication medium (cellular, telephone, unknown)"},
-        {"Feature": "day", "Type": "Numeric (int64)", "Description": "Last contact day of the month (1 - 31)"},
-        {"Feature": "month", "Type": "Categorical (object)", "Description": "Last contact month of the calendar year (jan - dec)"},
-        {"Feature": "duration", "Type": "Numeric (int64)", "Description": "Call duration in seconds. [EXCLUDED FROM PRIMARY MODEL]"},
-        {"Feature": "campaign", "Type": "Numeric (int64)", "Description": "Number of contacts performed during this campaign for client"},
-        {"Feature": "pdays", "Type": "Numeric (int64)", "Description": "Days passed after client was last contacted (-1 means never contacted)"},
-        {"Feature": "previous", "Type": "Numeric (int64)", "Description": "Number of contacts performed before this campaign for client"},
-        {"Feature": "poutcome", "Type": "Categorical (object)", "Description": "Outcome of the previous marketing campaign (unknown, failure, other, success)"},
-        {"Feature": "y", "Type": "Target Binary (object)", "Description": "Has client subscribed a term deposit? ('no' = 0, 'yes' = 1)"},
+        {"Column Name": "age", "Role": "Input Feature (ML)", "Type": "Numeric (int64)", "Description": "Client age in years (Range: 18 - 95)"},
+        {"Column Name": "job", "Role": "Input Feature (ML)", "Type": "Categorical (object)", "Description": "Type of employment (management, technician, blue-collar, etc.)"},
+        {"Column Name": "marital", "Role": "Input Feature (ML)", "Type": "Categorical (object)", "Description": "Marital status (married, single, divorced/widowed)"},
+        {"Column Name": "education", "Role": "Input Feature (ML)", "Type": "Categorical (object)", "Description": "Education level (primary, secondary, tertiary, unknown)"},
+        {"Column Name": "default", "Role": "Input Feature (ML)", "Type": "Binary (object)", "Description": "Has credit in default? ('no', 'yes')"},
+        {"Column Name": "balance", "Role": "Input Feature (ML)", "Type": "Numeric (int64)", "Description": "Average yearly account balance in Euros"},
+        {"Column Name": "housing", "Role": "Input Feature (ML)", "Type": "Binary (object)", "Description": "Has housing loan obligation? ('no', 'yes')"},
+        {"Column Name": "loan", "Role": "Input Feature (ML)", "Type": "Binary (object)", "Description": "Has personal loan obligation? ('no', 'yes')"},
+        {"Column Name": "contact", "Role": "Input Feature (ML)", "Type": "Categorical (object)", "Description": "Contact communication medium (cellular, telephone, unknown)"},
+        {"Column Name": "day", "Role": "Input Feature (ML)", "Type": "Numeric (int64)", "Description": "Last contact day of the month (1 - 31)"},
+        {"Column Name": "month", "Role": "Input Feature (ML)", "Type": "Categorical (object)", "Description": "Last contact month of the calendar year (jan - dec)"},
+        {"Column Name": "duration", "Role": "Excluded (Anti-leakage)", "Type": "Numeric (int64)", "Description": "Call duration in seconds. [EXCLUDED FROM ML PIPELINE: Unknown prior to calling]"},
+        {"Column Name": "campaign", "Role": "Input Feature (ML)", "Type": "Numeric (int64)", "Description": "Number of contacts performed during this campaign for client"},
+        {"Column Name": "pdays", "Role": "Input Feature (ML)", "Type": "Numeric (int64)", "Description": "Days passed after client was last contacted (-1 means never contacted)"},
+        {"Column Name": "previous", "Role": "Input Feature (ML)", "Type": "Numeric (int64)", "Description": "Number of contacts performed before this campaign for client"},
+        {"Column Name": "poutcome", "Role": "Input Feature (ML)", "Type": "Categorical (object)", "Description": "Outcome of the previous marketing campaign (unknown, failure, other, success)"},
+        {"Column Name": "y", "Role": "Target Variable", "Type": "Target Binary (object)", "Description": "Has client subscribed a term deposit? ('no' = 0, 'yes' = 1)"},
     ]
     df_schema = pd.DataFrame(schema_data)
     st.dataframe(df_schema, width="stretch", hide_index=True)

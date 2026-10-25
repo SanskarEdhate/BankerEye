@@ -107,7 +107,7 @@ def main():
         "duplicate_count": dups1,
         "removed_row_count": 0,
         "cleaning_actions": [
-            "Verified zero missing / NaN values across all 17 features.",
+            "Verified zero missing / NaN values across all 17 columns (16 features + 1 target 'y').",
             "Verified zero exact duplicate records across 45,211 rows.",
             "Validated target column 'y' integrity (39,922 'no' / 5,289 'yes').",
             "Identified informational 'unknown' categories in job, marital, education, contact, and poutcome.",

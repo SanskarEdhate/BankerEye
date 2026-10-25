@@ -71,7 +71,7 @@ with k2:
             feat_val = str(len(feats))
         else:
             feat_val = str(split_info.get("feature_count", "N/A"))
-        feat_badge = f"{feat_val} Features"
+        feat_badge = f"{feat_val} Features (ML)"
     else:
         feat_val = "Not trained"
         feat_badge = "Pending"
@@ -79,7 +79,7 @@ with k2:
     render_kpi_card(
         label="Input Features Used",
         value=feat_val,
-        subtext="Excludes 'duration' (anti-leakage)",
+        subtext="15 of 16 features (excludes 'duration')",
         badge_text=feat_badge,
         badge_type="info" if models_trained else "warning",
     )
