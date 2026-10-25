@@ -50,22 +50,108 @@ def apply_custom_css():
     [data-testid="stHeader"] {
         background-color: transparent !important;
         border-bottom: none !important;
-        height: 0px !important;
         pointer-events: none !important;
+        z-index: 999990 !important;
     }
 
-    [data-testid="stHeader"] button,
-    [data-testid="stSidebarCollapseButton"],
+    /* Sidebar Collapse & Expand Controls (Bulletproof Glyph Rendering - Zero 'keyboard_double' text leaks) */
     [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        position: fixed !important;
+        top: 14px !important;
+        left: 14px !important;
+        z-index: 999999 !important;
+        pointer-events: auto !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="stSidebarCollapseButton"] {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        width: 32px !important;
+        height: 32px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08) !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
         pointer-events: auto !important;
         visibility: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
-    /* CRITICAL: Preserve Streamlit Icon Fonts & Ligatures (Eliminates 'keyboard_double' text leak) */
-    [data-testid="stIconMaterial"],
-    [data-testid="stSidebarCollapseButton"] *,
+    [data-testid="stSidebarCollapsedControl"] button:hover,
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    [data-testid="stSidebarCollapseButton"]:hover {
+        background-color: #eff6ff !important;
+        border-color: #2563eb !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
+    }
+
+    /* Suppress any raw font text leak (e.g. 'keyboard_double_arrow_right') */
+    [data-testid="stSidebarCollapsedControl"] span,
+    [data-testid="stSidebarCollapsedControl"] button span,
     [data-testid="stSidebarCollapseButton"] span,
-    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapseButton"] button span {
+        font-size: 0px !important;
+        color: transparent !important;
+        line-height: 0 !important;
+        text-indent: -9999px !important;
+        overflow: hidden !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 20px !important;
+        height: 20px !important;
+        position: relative !important;
+    }
+
+    /* Guaranteed crisp chevron replacement via ::after pseudo-element */
+    [data-testid="stSidebarCollapsedControl"] span::after {
+        content: "»" !important;
+        font-size: 20px !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+        text-indent: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] span::after {
+        content: "«" !important;
+        font-size: 20px !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+        text-indent: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"] button:hover span::after,
+    [data-testid="stSidebarCollapseButton"] button:hover span::after,
+    [data-testid="stSidebarCollapseButton"]:hover span::after {
+        color: #2563eb !important;
+    }
+
+    /* Preserve other Material symbols & Emojis */
+    [data-testid="stIconMaterial"],
     .material-symbols-rounded,
     .material-symbols-outlined,
     .material-icons,
