@@ -150,8 +150,9 @@ bank-marketing-ml/
 │       ├── model_metrics.json
 │       └── evaluation_summary.json
 ├── frontend/
-│   ├── streamlit_app.py               # Landing page, sidebar branding, system status
-│   ├── pages/
+│   ├── streamlit_app.py               # Application router, modern st.navigation, executive layout
+│   ├── views/
+│   │   ├── Home.py                    # Executive overview, KPI metric cards, navigation module hub
 │   │   ├── 1_Dashboard.py             # Top KPIs, class donut chart, quick actions
 │   │   ├── 2_Dataset_Explorer.py      # Data preview, schema, descriptive stats, EDA
 │   │   ├── 3_Model_Comparison.py      # 4 cards, metric rankings, ROC, confusion matrix

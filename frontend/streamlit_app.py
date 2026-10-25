@@ -17,17 +17,18 @@ st.set_page_config(
     page_icon="🏦",
     layout="wide",
     initial_sidebar_state="expanded",
-)
+# Apply global styling stylesheet
+apply_custom_css()
 
 # Use Streamlit Navigation with resolved paths and Material icons
 pages = [
-    st.Page(FRONTEND_DIR / "Home.py", title="Home", icon=":material/home:", default=True),
-    st.Page(FRONTEND_DIR / "pages" / "1_Dashboard.py", title="Dashboard", icon=":material/dashboard:"),
-    st.Page(FRONTEND_DIR / "pages" / "2_Dataset_Explorer.py", title="Dataset Explorer", icon=":material/dataset:"),
-    st.Page(FRONTEND_DIR / "pages" / "3_Model_Comparison.py", title="Model Comparison", icon=":material/compare_arrows:"),
-    st.Page(FRONTEND_DIR / "pages" / "4_Subscription_Predictor.py", title="Subscription Predictor", icon=":material/psychology:"),
-    st.Page(FRONTEND_DIR / "pages" / "5_Batch_Prediction.py", title="Batch Prediction", icon=":material/upload_file:"),
-    st.Page(FRONTEND_DIR / "pages" / "6_Reports_and_Insights.py", title="Reports & Insights", icon=":material/description:"),
+    st.Page(FRONTEND_DIR / "views" / "Home.py", title="Home", icon=":material/home:", default=True),
+    st.Page(FRONTEND_DIR / "views" / "1_Dashboard.py", title="Dashboard", icon=":material/dashboard:"),
+    st.Page(FRONTEND_DIR / "views" / "2_Dataset_Explorer.py", title="Dataset Explorer", icon=":material/dataset:"),
+    st.Page(FRONTEND_DIR / "views" / "3_Model_Comparison.py", title="Model Comparison", icon=":material/compare_arrows:"),
+    st.Page(FRONTEND_DIR / "views" / "4_Subscription_Predictor.py", title="Subscription Predictor", icon=":material/psychology:"),
+    st.Page(FRONTEND_DIR / "views" / "5_Batch_Prediction.py", title="Batch Prediction", icon=":material/upload_file:"),
+    st.Page(FRONTEND_DIR / "views" / "6_Reports_and_Insights.py", title="Reports & Insights", icon=":material/description:"),
 ]
 
 pg = st.navigation(pages)
