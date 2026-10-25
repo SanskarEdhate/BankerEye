@@ -68,24 +68,49 @@ def apply_custom_css():
     }
 
     /* =========================================================================
-       SIDEBAR RE-ORDERING (BankerEye Branding at Top of Sidebar)
+       SIDEBAR RE-ORDERING (Header & BankerEye Branding at Top of Sidebar)
        ========================================================================= */
     [data-testid="stSidebarContent"] {
         display: flex !important;
         flex-direction: column !important;
+        padding-top: 0.25rem !important;
     }
 
-    /* 1. Header with collapse button at the very top */
+    /* All direct children default to order: 10 so nav links sit below header & brand card */
+    [data-testid="stSidebarContent"] > * {
+        order: 10 !important;
+    }
+
+    /* 1. Header with collapse button at the top */
+    [data-testid="stSidebarContent"] > [data-testid="stSidebarHeader"],
     [data-testid="stSidebarHeader"] {
         order: 1 !important;
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         justify-content: flex-end !important;
+        align-items: center !important;
         padding: 0.5rem 0.75rem 0.25rem 0.75rem !important;
+        min-height: 40px !important;
+    }
+
+    /* Force collapse button wrapper to be visible */
+    [data-testid="stSidebarHeader"] div,
+    [data-testid="stSidebarCollapseButton"] {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: flex !important;
+    }
+
+    /* Hide logo spacer so collapse button is at the top right */
+    [data-testid="stLogoSpacer"] {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
 
     /* 2. BankerEye Branding Card directly below the header */
+    [data-testid="stSidebarContent"] > [data-testid="stSidebarUserContent"],
     [data-testid="stSidebarUserContent"] {
         order: 2 !important;
         padding: 0.25rem 0.5rem 0.5rem 0.5rem !important;
@@ -93,7 +118,7 @@ def apply_custom_css():
 
     /* 3. Navigation page links cleanly below the branding card */
     [data-testid="stSidebarNav"] {
-        order: 3 !important;
+        order: 10 !important;
         padding-top: 0.25rem !important;
     }
 
@@ -103,9 +128,7 @@ def apply_custom_css():
     /* 1. EXPAND SIDEBAR BUTTON (Visible when sidebar is COLLAPSED) */
     [data-testid="stExpandSidebarButton"],
     [data-testid="stExpandSidebarButton"] button,
-    button[aria-label="Expand sidebar"],
-    [data-testid="stSidebarCollapsedControl"],
-    [data-testid="stSidebarCollapsedControl"] button {
+    button[aria-label="Expand sidebar"] {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -132,9 +155,7 @@ def apply_custom_css():
 
     [data-testid="stExpandSidebarButton"]:hover,
     [data-testid="stExpandSidebarButton"] button:hover,
-    button[aria-label="Expand sidebar"]:hover,
-    [data-testid="stSidebarCollapsedControl"]:hover,
-    [data-testid="stSidebarCollapsedControl"] button:hover {
+    button[aria-label="Expand sidebar"]:hover {
         background-color: #eff6ff !important;
         border-color: #2563eb !important;
         box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
@@ -178,8 +199,6 @@ def apply_custom_css():
           'keyboard_double_arrow_right' & 'keyboard_double_arrow_left' */
     [data-testid="stExpandSidebarButton"] span,
     [data-testid="stExpandSidebarButton"] * span,
-    [data-testid="stSidebarCollapsedControl"] span,
-    [data-testid="stSidebarCollapsedControl"] * span,
     [data-testid="stSidebarCollapseButton"] span,
     [data-testid="stSidebarCollapseButton"] * span,
     button[aria-label="Expand sidebar"] span,
@@ -200,15 +219,13 @@ def apply_custom_css():
     /* 4. CRISP CHEVRON PSEUDO-ELEMENTS */
     /* Avoid duplicate chevrons on container div: */
     [data-testid="stExpandSidebarButton"]::after,
-    [data-testid="stSidebarCollapseButton"]::after,
-    [data-testid="stSidebarCollapsedControl"]::after {
+    [data-testid="stSidebarCollapseButton"]::after {
         content: none !important;
     }
 
     /* Expand button chevron (» points right to open sidebar) */
     [data-testid="stExpandSidebarButton"] button::after,
-    button[aria-label="Expand sidebar"]::after,
-    [data-testid="stSidebarCollapsedControl"] button::after {
+    button[aria-label="Expand sidebar"]::after {
         content: "»" !important;
         font-size: 24px !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -246,7 +263,6 @@ def apply_custom_css():
 
     [data-testid="stExpandSidebarButton"]:hover button::after,
     button[aria-label="Expand sidebar"]:hover::after,
-    [data-testid="stSidebarCollapsedControl"]:hover button::after,
     [data-testid="stSidebarCollapseButton"]:hover button::after,
     button[aria-label="Collapse sidebar"]:hover::after {
         color: #2563eb !important;
@@ -334,31 +350,6 @@ def apply_custom_css():
         box-shadow: 2px 0 12px rgba(15, 23, 42, 0.03) !important;
     }
 
-    [data-testid="stSidebarContent"] {
-        background-color: #ffffff !important;
-        display: flex !important;
-        flex-direction: column !important;
-        padding: 1rem 1rem 1.5rem 1rem !important;
-    }
-
-    /* Re-order Sidebar so BankerEye Brand Header is firmly at the TOP */
-    [data-testid="stSidebarHeader"] {
-        order: 1 !important;
-        padding: 0 !important;
-        margin-bottom: 6px !important;
-    }
-
-    [data-testid="stSidebarUserContent"] {
-        order: 2 !important;
-        padding: 0 !important;
-        margin-bottom: 4px !important;
-    }
-
-    [data-testid="stSidebarNav"] {
-        order: 3 !important;
-        padding-top: 6px !important;
-    }
-
     [data-testid="stSidebarNav"]::before {
         content: "PLATFORM NAVIGATION" !important;
         display: block !important;
@@ -368,97 +359,6 @@ def apply_custom_css():
         letter-spacing: 0.08em !important;
         text-transform: uppercase !important;
         padding: 6px 12px 6px 12px !important;
-    }
-
-    /* Sidebar Brand Card */
-    .sidebar-brand-card {
-        background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 50%, #eff6ff 100%) !important;
-        border: 1px solid #bfdbfe !important;
-        border-radius: 12px !important;
-        padding: 14px 14px 12px 14px !important;
-        margin-bottom: 12px !important;
-        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.07), 0 1px 2px rgba(15, 23, 42, 0.03) !important;
-    }
-
-    .sidebar-brand-badge {
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-    }
-
-    .sidebar-brand-logo {
-        font-size: 24px !important;
-        line-height: 1 !important;
-        background: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 10px !important;
-        padding: 6px !important;
-        box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05) !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-
-    .sidebar-brand-names {
-        display: flex !important;
-        flex-direction: column !important;
-    }
-
-    .sidebar-brand-title {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 18px !important;
-        font-weight: 800 !important;
-        color: #0f172a !important;
-        letter-spacing: -0.02em !important;
-        line-height: 1.15 !important;
-    }
-
-    .sidebar-brand-accent {
-        color: #2563eb !important;
-    }
-
-    .sidebar-brand-tagline {
-        font-size: 10.5px !important;
-        font-weight: 600 !important;
-        color: #64748b !important;
-        letter-spacing: 0.04em !important;
-        text-transform: uppercase !important;
-        margin-top: 2px !important;
-    }
-
-    .sidebar-brand-divider {
-        height: 1px !important;
-        background: #e2e8f0 !important;
-        margin: 10px 0 8px 0 !important;
-    }
-
-    .sidebar-brand-status {
-        display: flex !important;
-        align-items: center !important;
-        gap: 6px !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        color: #047857 !important;
-    }
-
-    .status-indicator-dot {
-        width: 7px !important;
-        height: 7px !important;
-        background-color: #10b981 !important;
-        border-radius: 50% !important;
-        display: inline-block !important;
-        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
-        animation: pulse-dot 2s infinite ease-in-out !important;
-    }
-
-    @keyframes pulse-dot {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3); }
-        50% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3); }
-    }
-
-    section[data-testid="stSidebar"] * {
-        color: #1e293b !important;
     }
 
     section[data-testid="stSidebar"] .stCaption, 

@@ -148,19 +148,19 @@ st.markdown("#### Quick Actions & Workflow")
 act1, act2, act3 = st.columns(3)
 
 with act1:
-    st.markdown("##### 🔍 Explore Dataset")
-    st.caption("Inspect categorical distributions, numerical ranges, missing values, and leakage prevention.")
-    if st.button("Open Dataset Explorer", use_container_width=True):
-        st.switch_page("pages/2_Dataset_Explorer.py")
+    with st.container(border=True):
+        st.markdown("##### 🔍 Explore Dataset")
+        st.caption("Inspect categorical distributions, numerical ranges, missing values, and leakage prevention.")
+        st.page_link("pages/2_Dataset_Explorer.py", label="Open Dataset Explorer →", width="stretch")
 
 with act2:
-    st.markdown("##### ⚖️ Compare Models")
-    st.caption("Evaluate ROC-AUC, precision-recall trade-offs, confusion matrices, and training latencies.")
-    if st.button("Open Model Comparison", use_container_width=True):
-        st.switch_page("pages/3_Model_Comparison.py")
+    with st.container(border=True):
+        st.markdown("##### ⚖️ Compare Models")
+        st.caption("Evaluate ROC-AUC, precision-recall trade-offs, confusion matrices, and training latencies.")
+        st.page_link("pages/3_Model_Comparison.py", label="Open Model Comparison →", width="stretch")
 
 with act3:
-    st.markdown("##### 🎯 Make Predictions")
-    st.caption("Input prospective customer parameters to obtain immediate term deposit subscription probabilities.")
-    if st.button("Open Subscription Predictor", use_container_width=True):
-        st.switch_page("pages/4_Subscription_Predictor.py")
+    with st.container(border=True):
+        st.markdown("##### 🎯 Make Predictions")
+        st.caption("Input prospective customer parameters to obtain immediate term deposit subscription probabilities.")
+        st.page_link("pages/4_Subscription_Predictor.py", label="Open Subscription Predictor →", width="stretch")
