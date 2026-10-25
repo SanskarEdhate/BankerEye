@@ -9,6 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+import importlib
+if "frontend.utils.api_client" in sys.modules:
+    import frontend.utils.api_client
+    importlib.reload(frontend.utils.api_client)
+
 from frontend.utils.styling import apply_custom_css
 from frontend.utils.api_client import (
     check_api_health,

@@ -10,6 +10,27 @@ API_BASE_URL = os.getenv("STREAMLIT_API_BASE_URL", "http://127.0.0.1:5000").rstr
 DEFAULT_TIMEOUT = 12.0
 TRAIN_TIMEOUT = 90.0
 
+__all__ = [
+    "API_BASE_URL",
+    "check_api_health",
+    "get_dataset_summary",
+    "get_dataset_sample",
+    "get_dataset_categories",
+    "get_dataset_catalog",
+    "trigger_model_training",
+    "get_model_comparison",
+    "get_feature_importance",
+    "predict_single",
+    "predict_all_models_api",
+    "predict_batch_csv",
+    "get_evaluation_report",
+    "download_metrics_csv_url",
+    "download_report_pdf_url",
+    "get_dataset_manifest",
+    "get_dataset_cleaning_summary",
+    "get_dataset_stage_details",
+]
+
 
 def check_api_health() -> Dict[str, Any]:
     """Checks whether the Flask backend is running and healthy."""
