@@ -1,9 +1,510 @@
 import streamlit as st
 
-def apply_custom_css():
-    """Applies modern, clean, high-contrast light banking analytics stylesheet to Streamlit."""
-    custom_css = """
-    <style>
+
+def _sidebar_css() -> str:
+    """Returns banking-grade styling rules for the BankerEye sidebar, navigation, and brand card.
+
+    Includes:
+    - Fixed 280px container, light theme, 1px #e2e8f0 border, zero heavy shadows.
+    - Deterministic flex ordering: collapse button (1), brand card (2), nav links (3), pinned footer (100).
+    - 40px nav items, 10px radius, 12px horizontal padding, 18px icons, #334155 text.
+    - Hover (#f1f5f9) and active states (#eff6ff, text #1d4ed8, 3px left indicator bar #2563eb).
+    - Platform Navigation 11px uppercase section header (#94a3b8).
+    - Pulsing status indicator dot (#16a34a) with prefers-reduced-motion support.
+    - Mobile (<768px) and collapsed state support preventing layout clipping or text overlap.
+    """
+    return """
+    /* =========================================================================
+       BANKEREYE SIDEBAR DESIGN SYSTEM (Banking-Grade)
+       ========================================================================= */
+
+    /* 1. Sidebar Container & Layout Order */
+    section[data-testid="stSidebar"][aria-expanded="true"],
+    section[data-testid="stSidebar"]:not([aria-expanded="false"]) {
+        width: 280px !important;
+        min-width: 280px !important;
+        max-width: 280px !important;
+        background-color: #ffffff !important;
+        border-right: 1px solid #e2e8f0 !important;
+        box-shadow: none !important;
+    }
+
+    /* Collapsed Sidebar: No bleed, no border clipping */
+    section[data-testid="stSidebar"][aria-expanded="false"] {
+        min-width: 0 !important;
+        width: 0 !important;
+        border-right: none !important;
+    }
+
+    /* Mobile Viewport (<768px): Responsive overlay without text clipping */
+    @media (max-width: 768px) {
+        section[data-testid="stSidebar"][aria-expanded="true"],
+        section[data-testid="stSidebar"]:not([aria-expanded="false"]) {
+            width: min(280px, 100vw) !important;
+            min-width: 0 !important;
+            max-width: 100vw !important;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15) !important;
+            z-index: 999999 !important;
+        }
+        [data-testid="stSidebarContent"] {
+            width: 100% !important;
+            max-width: 100vw !important;
+        }
+    }
+
+    [data-testid="stSidebarContent"] {
+        width: 280px !important;
+        padding: 16px !important;
+        background-color: #ffffff !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        min-height: 100vh !important;
+        gap: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* All direct children default to order: 10 */
+    [data-testid="stSidebarContent"] > * {
+        order: 10 !important;
+    }
+
+    /* 2. Top Header & Collapse Button (Order: 1) */
+    [data-testid="stSidebarContent"] > [data-testid="stSidebarHeader"],
+    [data-testid="stSidebarHeader"] {
+        order: 1 !important;
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        padding: 0 0 10px 0 !important;
+        min-height: 36px !important;
+        background: transparent !important;
+    }
+
+    [data-testid="stSidebarHeader"] div,
+    [data-testid="stSidebarCollapseButton"] {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: flex !important;
+    }
+
+    [data-testid="stLogoSpacer"] {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* Unbox User Content container so brand card & footer position seamlessly */
+    [data-testid="stSidebarContent"] > [data-testid="stSidebarUserContent"],
+    [data-testid="stSidebarUserContent"] {
+        display: contents !important;
+    }
+
+    /* 3. Brand Card (Order: 2) */
+    .st-key-sidebar-brand {
+        order: 2 !important;
+        width: 100% !important;
+        margin-bottom: 2px !important;
+    }
+
+    .sidebar-brand-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 10px !important;
+        padding: 12px 14px !important;
+        margin: 0 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+    }
+
+    .sidebar-brand-header {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    .sidebar-brand-logo-tile {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 10px !important;
+        background: #eff6ff !important;
+        border: 1px solid #dbeafe !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+
+    .sidebar-brand-text {
+        display: flex !important;
+        flex-direction: column !important;
+        min-width: 0 !important;
+    }
+
+    .sidebar-brand-title {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    .sidebar-brand-accent {
+        color: #2563eb !important;
+        font-weight: 800 !important;
+    }
+
+    .sidebar-brand-tagline {
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        color: #64748b !important;
+        line-height: 1.2 !important;
+        margin-top: 2px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .sidebar-brand-divider {
+        height: 1px !important;
+        background: #f1f5f9 !important;
+        margin: 10px 0 !important;
+        border: none !important;
+    }
+
+    .sidebar-brand-status {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #16a34a !important;
+        line-height: 1 !important;
+    }
+
+    .status-indicator-dot {
+        width: 7px !important;
+        height: 7px !important;
+        border-radius: 50% !important;
+        background-color: #16a34a !important;
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4) !important;
+        display: inline-block !important;
+        flex-shrink: 0 !important;
+        animation: status-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1) !important;
+    }
+
+    @keyframes status-pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
+        }
+        70% {
+            box-shadow: 0 0 0 5px rgba(22, 163, 74, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+        }
+    }
+
+    /* 4. Platform Navigation Section Header & Links (Order: 3) */
+    [data-testid="stSidebarNav"],
+    [data-testid="stSidebarContent"] > div:has([data-testid="stSidebarNav"]) {
+        order: 3 !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    [data-testid="stSidebarNav"]::before {
+        content: "PLATFORM NAVIGATION" !important;
+        display: block !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: #94a3b8 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        margin-top: 16px !important;
+        margin-bottom: 8px !important;
+        padding: 0 12px !important;
+    }
+
+    [data-testid="stSidebarNav"] ul {
+        padding: 0 !important;
+        margin: 0 !important;
+        list-style: none !important;
+    }
+
+    [data-testid="stSidebarNav"] li {
+        margin-bottom: 2px !important;
+    }
+
+    [data-testid="stSidebarNav"] a,
+    [data-testid="stSidebarNavLink"] {
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        border-radius: 10px !important;
+        padding: 0 12px !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #334155 !important;
+        text-decoration: none !important;
+        transition: all 150ms ease-in-out !important;
+        background-color: transparent !important;
+        border-left: 3px solid transparent !important;
+        box-sizing: border-box !important;
+    }
+
+    [data-testid="stSidebarNav"] a span {
+        transition: all 150ms ease-in-out !important;
+    }
+
+    [data-testid="stSidebarNav"] a span[data-testid="stIconMaterial"],
+    [data-testid="stSidebarNav"] a svg,
+    [data-testid="stSidebarNav"] a span:first-child {
+        font-size: 18px !important;
+        width: 18px !important;
+        height: 18px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+    }
+
+    [data-testid="stSidebarNav"] a span:last-child {
+        font-size: 14px !important;
+        font-weight: inherit !important;
+        color: inherit !important;
+        line-height: 1.2 !important;
+    }
+
+    [data-testid="stSidebarNav"] a:hover {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+    }
+
+    [data-testid="stSidebarNav"] a:hover span {
+        color: #0f172a !important;
+    }
+
+    [data-testid="stSidebarNav"] a[aria-current="page"] {
+        background-color: #eff6ff !important;
+        color: #1d4ed8 !important;
+        border-left: 3px solid #2563eb !important;
+        font-weight: 600 !important;
+    }
+
+    [data-testid="stSidebarNav"] a[aria-current="page"] span {
+        color: #1d4ed8 !important;
+        font-weight: 600 !important;
+    }
+
+    /* 5. Pinned Sidebar Footer (Order: 100) */
+    .st-key-sidebar-footer {
+        order: 100 !important;
+        margin-top: auto !important;
+        width: 100% !important;
+    }
+
+    .sidebar-footer-card {
+        width: 100% !important;
+        margin-top: auto !important;
+        padding-top: 14px !important;
+        box-sizing: border-box !important;
+    }
+
+    .sidebar-footer-divider {
+        height: 1px !important;
+        background: #e2e8f0 !important;
+        margin-bottom: 10px !important;
+        border: none !important;
+    }
+
+    .sidebar-footer-meta {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 3px !important;
+        padding: 0 4px !important;
+    }
+
+    .sidebar-footer-version {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+        line-height: 1.3 !important;
+    }
+
+    .sidebar-footer-copy {
+        font-size: 11px !important;
+        font-weight: 400 !important;
+        color: #94a3b8 !important;
+        line-height: 1.3 !important;
+    }
+
+    /* 6. Expand & Collapse Toggle Buttons */
+    [data-testid="stExpandSidebarButton"],
+    [data-testid="stExpandSidebarButton"] button,
+    button[aria-label="Expand sidebar"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12) !important;
+        cursor: pointer !important;
+        position: fixed !important;
+        top: 14px !important;
+        left: 14px !important;
+        z-index: 9999999 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transition: all 0.15s ease !important;
+    }
+
+    [data-testid="stExpandSidebarButton"]:hover,
+    [data-testid="stExpandSidebarButton"] button:hover,
+    button[aria-label="Expand sidebar"]:hover {
+        background-color: #eff6ff !important;
+        border-color: #2563eb !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapseButton"] button,
+    button[aria-label="Collapse sidebar"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+        cursor: pointer !important;
+        position: relative !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transition: all 0.15s ease !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    button[aria-label="Collapse sidebar"]:hover {
+        background-color: #eff6ff !important;
+        border-color: #2563eb !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
+    }
+
+    /* Chevron glyphs & text-leak suppression */
+    [data-testid="stExpandSidebarButton"] span,
+    [data-testid="stExpandSidebarButton"] * span,
+    [data-testid="stSidebarCollapseButton"] span,
+    [data-testid="stSidebarCollapseButton"] * span,
+    button[aria-label="Expand sidebar"] span,
+    button[aria-label="Expand sidebar"] * span,
+    button[aria-label="Collapse sidebar"] span,
+    button[aria-label="Collapse sidebar"] * span {
+        display: none !important;
+        visibility: hidden !important;
+        font-size: 0px !important;
+        line-height: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        color: transparent !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+    }
+
+    [data-testid="stExpandSidebarButton"]::after,
+    [data-testid="stSidebarCollapseButton"]::after {
+        content: none !important;
+    }
+
+    [data-testid="stExpandSidebarButton"] button::after,
+    button[aria-label="Expand sidebar"]::after {
+        content: "»" !important;
+        font-size: 24px !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-weight: 800 !important;
+        color: #1e293b !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        pointer-events: none !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] button::after,
+    button[aria-label="Collapse sidebar"]::after {
+        content: "«" !important;
+        font-size: 20px !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-weight: 800 !important;
+        color: #1e293b !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        pointer-events: none !important;
+    }
+
+    [data-testid="stExpandSidebarButton"]:hover button::after,
+    button[aria-label="Expand sidebar"]:hover::after,
+    [data-testid="stSidebarCollapseButton"]:hover button::after,
+    button[aria-label="Collapse sidebar"]:hover::after {
+        color: #2563eb !important;
+    }
+
+    /* 7. Accessibility - Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+        .status-indicator-dot {
+            animation: none !important;
+            box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
+        }
+        [data-testid="stSidebarNav"] a,
+        [data-testid="stExpandSidebarButton"],
+        [data-testid="stSidebarCollapseButton"] {
+            transition: none !important;
+        }
+    }
+    """
+
+
+
+def _global_css() -> str:
+    """Returns core global application CSS (typography, colors, tables, components)."""
+    return """
     /* Google Fonts Import - Inter, JetBrains Mono, and Material Symbols */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block');
@@ -81,239 +582,6 @@ def apply_custom_css():
         overflow: hidden !important;
     }
 
-    /* =========================================================================
-       SIDEBAR CONTAINER & FLEX ORDER HIERARCHY
-       ========================================================================= */
-    section[data-testid="stSidebar"] {
-        width: 280px !important;
-        min-width: 280px !important;
-        max-width: 280px !important;
-        background-color: #ffffff !important;
-        border-right: 1px solid #e2e8f0 !important;
-        box-shadow: none !important;
-    }
-
-    [data-testid="stSidebarContent"] {
-        width: 280px !important;
-        padding: 16px !important;
-        background-color: #ffffff !important;
-        display: flex !important;
-        flex-direction: column !important;
-        height: 100% !important;
-        min-height: 100vh !important;
-        gap: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    /* All direct children default to order: 10 */
-    [data-testid="stSidebarContent"] > * {
-        order: 10 !important;
-    }
-
-    /* 1. Header with collapse button at the top */
-    [data-testid="stSidebarContent"] > [data-testid="stSidebarHeader"],
-    [data-testid="stSidebarHeader"] {
-        order: 1 !important;
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        justify-content: flex-end !important;
-        align-items: center !important;
-        padding: 0 0 10px 0 !important;
-        min-height: 36px !important;
-        background: transparent !important;
-    }
-
-    /* Force collapse button wrapper to be visible */
-    [data-testid="stSidebarHeader"] div,
-    [data-testid="stSidebarCollapseButton"] {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: flex !important;
-    }
-
-    /* Hide logo spacer so collapse button is at the top right */
-    [data-testid="stLogoSpacer"] {
-        display: none !important;
-        width: 0 !important;
-        height: 0 !important;
-    }
-
-    /* Unbox User Content container so brand card & footer position seamlessly */
-    [data-testid="stSidebarContent"] > [data-testid="stSidebarUserContent"],
-    [data-testid="stSidebarUserContent"] {
-        display: contents !important;
-    }
-
-    /* 2. Brand Card: pinned directly below collapse header */
-    .st-key-sidebar-brand {
-        order: 2 !important;
-        width: 100% !important;
-        margin-bottom: 2px !important;
-    }
-
-    /* 3. Navigation page links cleanly below the branding card */
-    [data-testid="stSidebarNav"],
-    [data-testid="stSidebarContent"] > div:has([data-testid="stSidebarNav"]) {
-        order: 3 !important;
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    /* 4. Footer pinned to bottom of sidebar */
-    .st-key-sidebar-footer {
-        order: 100 !important;
-        margin-top: auto !important;
-        width: 100% !important;
-    }
-
-    /* =========================================================================
-       SIDEBAR TOGGLE BUTTONS (Expand & Collapse - Bulletproof Glyph Replacement)
-       ========================================================================= */
-    /* 1. EXPAND SIDEBAR BUTTON (Visible when sidebar is COLLAPSED) */
-    [data-testid="stExpandSidebarButton"],
-    [data-testid="stExpandSidebarButton"] button,
-    button[aria-label="Expand sidebar"] {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12) !important;
-        cursor: pointer !important;
-        position: fixed !important;
-        top: 14px !important;
-        left: 14px !important;
-        z-index: 9999999 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        transition: all 0.15s ease !important;
-    }
-
-    [data-testid="stExpandSidebarButton"]:hover,
-    [data-testid="stExpandSidebarButton"] button:hover,
-    button[aria-label="Expand sidebar"]:hover {
-        background-color: #eff6ff !important;
-        border-color: #2563eb !important;
-        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
-    }
-
-    /* 2. COLLAPSE SIDEBAR BUTTON (Visible when sidebar is OPEN) */
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapseButton"] button,
-    button[aria-label="Collapse sidebar"] {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-        width: 32px !important;
-        height: 32px !important;
-        min-width: 32px !important;
-        min-height: 32px !important;
-        align-items: center !important;
-        justify-content: center !important;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
-        cursor: pointer !important;
-        position: relative !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        transition: all 0.15s ease !important;
-    }
-
-    [data-testid="stSidebarCollapseButton"]:hover,
-    [data-testid="stSidebarCollapseButton"] button:hover,
-    button[aria-label="Collapse sidebar"]:hover {
-        background-color: #eff6ff !important;
-        border-color: #2563eb !important;
-        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
-    }
-
-    /* 3. ZERO-TOLERANCE TEXT LEAK SUPPRESSION
-          Permanently eradicate any raw font ligatures:
-          'keyboard_double_arrow_right' & 'keyboard_double_arrow_left' */
-    [data-testid="stExpandSidebarButton"] span,
-    [data-testid="stExpandSidebarButton"] * span,
-    [data-testid="stSidebarCollapseButton"] span,
-    [data-testid="stSidebarCollapseButton"] * span,
-    button[aria-label="Expand sidebar"] span,
-    button[aria-label="Expand sidebar"] * span,
-    button[aria-label="Collapse sidebar"] span,
-    button[aria-label="Collapse sidebar"] * span {
-        display: none !important;
-        visibility: hidden !important;
-        font-size: 0px !important;
-        line-height: 0 !important;
-        width: 0 !important;
-        height: 0 !important;
-        color: transparent !important;
-        overflow: hidden !important;
-        opacity: 0 !important;
-    }
-
-    /* 4. CRISP CHEVRON PSEUDO-ELEMENTS */
-    /* Avoid duplicate chevrons on container div: */
-    [data-testid="stExpandSidebarButton"]::after,
-    [data-testid="stSidebarCollapseButton"]::after {
-        content: none !important;
-    }
-
-    /* Expand button chevron (» points right to open sidebar) */
-    [data-testid="stExpandSidebarButton"] button::after,
-    button[aria-label="Expand sidebar"]::after {
-        content: "»" !important;
-        font-size: 24px !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-weight: 800 !important;
-        color: #1e293b !important;
-        line-height: 1 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        pointer-events: none !important;
-    }
-
-    /* Collapse button chevron (« points left to close sidebar) */
-    [data-testid="stSidebarCollapseButton"] button::after,
-    button[aria-label="Collapse sidebar"]::after {
-        content: "«" !important;
-        font-size: 20px !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-weight: 800 !important;
-        color: #1e293b !important;
-        line-height: 1 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        pointer-events: none !important;
-    }
-
-    [data-testid="stExpandSidebarButton"]:hover button::after,
-    button[aria-label="Expand sidebar"]:hover::after,
-    [data-testid="stSidebarCollapseButton"]:hover button::after,
-    button[aria-label="Collapse sidebar"]:hover::after {
-        color: #2563eb !important;
-    }
-
     /* Preserve other Material symbols & Emojis */
     [data-testid="stIconMaterial"],
     .material-symbols-rounded,
@@ -389,107 +657,6 @@ def apply_custom_css():
         vertical-align: middle !important;
     }
 
-    /* Streamlit Sidebar Enforcement (Clean White) */
-    section[data-testid="stSidebar"] {
-        background-color: #ffffff !important;
-        border-right: 1px solid #e2e8f0 !important;
-        box-shadow: none !important;
-    }
-
-    /* Platform Navigation Section Header */
-    [data-testid="stSidebarNav"]::before {
-        content: "PLATFORM NAVIGATION" !important;
-        display: block !important;
-        font-size: 11px !important;
-        font-weight: 700 !important;
-        color: #94a3b8 !important;
-        letter-spacing: 0.08em !important;
-        text-transform: uppercase !important;
-        margin-top: 16px !important;
-        margin-bottom: 8px !important;
-        padding: 0 12px !important;
-    }
-
-    [data-testid="stSidebarNav"] ul {
-        padding: 0 !important;
-        margin: 0 !important;
-        list-style: none !important;
-    }
-
-    [data-testid="stSidebarNav"] li {
-        margin-bottom: 2px !important;
-    }
-
-    /* Modern 40px Banking-Grade Nav Links */
-    [data-testid="stSidebarNav"] a,
-    [data-testid="stSidebarNavLink"] {
-        height: 40px !important;
-        min-height: 40px !important;
-        max-height: 40px !important;
-        border-radius: 10px !important;
-        padding: 0 12px !important;
-        margin: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        color: #334155 !important;
-        text-decoration: none !important;
-        transition: all 150ms ease-in-out !important;
-        background-color: transparent !important;
-        border-left: 3px solid transparent !important;
-        box-sizing: border-box !important;
-    }
-
-    [data-testid="stSidebarNav"] a span {
-        transition: all 150ms ease-in-out !important;
-    }
-
-    /* Nav Item Icon (18px, Material symbols / Emojis) */
-    [data-testid="stSidebarNav"] a span[data-testid="stIconMaterial"],
-    [data-testid="stSidebarNav"] a svg,
-    [data-testid="stSidebarNav"] a span:first-child {
-        font-size: 18px !important;
-        width: 18px !important;
-        height: 18px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        line-height: 1 !important;
-        flex-shrink: 0 !important;
-    }
-
-    /* Nav Item Label Text */
-    [data-testid="stSidebarNav"] a span:last-child {
-        font-size: 14px !important;
-        font-weight: inherit !important;
-        color: inherit !important;
-        line-height: 1.2 !important;
-    }
-
-    /* Hover State */
-    [data-testid="stSidebarNav"] a:hover {
-        background-color: #f1f5f9 !important;
-        color: #0f172a !important;
-    }
-
-    [data-testid="stSidebarNav"] a:hover span {
-        color: #0f172a !important;
-    }
-
-    /* Active State */
-    [data-testid="stSidebarNav"] a[aria-current="page"] {
-        background-color: #eff6ff !important;
-        color: #1d4ed8 !important;
-        border-left: 3px solid #2563eb !important;
-        font-weight: 600 !important;
-    }
-
-    [data-testid="stSidebarNav"] a[aria-current="page"] span {
-        color: #1d4ed8 !important;
-        font-weight: 600 !important;
-    }
 
     /* Executive Navy Gradient Banner */
     .bank-header {
@@ -903,157 +1070,34 @@ def apply_custom_css():
         margin-bottom: 8px;
     }
 
-    /* Executive BankerEye Compact Sidebar Brand Card */
-    .sidebar-brand-card {
-        background: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 10px !important;
-        padding: 12px 14px !important;
-        margin: 0 !important;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
-        box-sizing: border-box !important;
-    }
 
-    .sidebar-brand-header {
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-    }
-
-    .sidebar-brand-logo-tile {
-        width: 38px !important;
-        height: 38px !important;
-        min-width: 38px !important;
-        min-height: 38px !important;
-        border-radius: 10px !important;
-        background: #eff6ff !important;
-        border: 1px solid #dbeafe !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        flex-shrink: 0 !important;
-    }
-
-    .sidebar-brand-text {
-        display: flex !important;
-        flex-direction: column !important;
-        min-width: 0 !important;
-    }
-
-    .sidebar-brand-title {
-        font-size: 16px !important;
-        font-weight: 700 !important;
-        color: #0f172a !important;
-        line-height: 1.2 !important;
-        letter-spacing: -0.02em !important;
-    }
-
-    .sidebar-brand-accent {
-        color: #2563eb !important;
-        font-weight: 800 !important;
-    }
-
-    .sidebar-brand-tagline {
-        font-size: 11px !important;
-        font-weight: 500 !important;
-        color: #64748b !important;
-        line-height: 1.2 !important;
-        margin-top: 2px !important;
-        white-space: nowrap !important;
-    }
-
-    .sidebar-brand-divider {
-        height: 1px !important;
-        background: #f1f5f9 !important;
-        margin: 10px 0 !important;
-        border: none !important;
-    }
-
-    .sidebar-brand-status {
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        color: #16a34a !important;
-        line-height: 1 !important;
-    }
-
-    .status-indicator-dot {
-        width: 7px !important;
-        height: 7px !important;
-        border-radius: 50% !important;
-        background-color: #16a34a !important;
-        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4) !important;
-        display: inline-block !important;
-        flex-shrink: 0 !important;
-        animation: status-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1) !important;
-    }
-
-    @keyframes status-pulse {
-        0% {
-            box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
-        }
-        70% {
-            box-shadow: 0 0 0 5px rgba(22, 163, 74, 0);
-        }
-        100% {
-            box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .status-indicator-dot {
-            animation: none !important;
-            box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2) !important;
-        }
-        [data-testid="stSidebarNav"] a {
-            transition: none !important;
-        }
-    }
-
-    /* Pinned Sidebar Footer */
-    .sidebar-footer-card {
-        width: 100% !important;
-        margin-top: auto !important;
-        padding-top: 14px !important;
-        box-sizing: border-box !important;
-    }
-
-    .sidebar-footer-divider {
-        height: 1px !important;
-        background: #e2e8f0 !important;
-        margin-bottom: 10px !important;
-        border: none !important;
-    }
-
-    .sidebar-footer-meta {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 3px !important;
-        padding: 0 4px !important;
-    }
-
-    .sidebar-footer-version {
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        color: #64748b !important;
-        line-height: 1.3 !important;
-    }
-
-    .sidebar-footer-copy {
-        font-size: 11px !important;
-        font-weight: 400 !important;
-        color: #94a3b8 !important;
-        line-height: 1.3 !important;
-    }
-    </style>
     """
+
+
+
+def apply_custom_css():
+    """Applies modern, clean, high-contrast light banking analytics stylesheet to Streamlit."""
+    # Reset rendering flags for idempotency on script rerun
+    st.session_state["_sidebar_branding_rendered"] = False
+    st.session_state["_sidebar_footer_rendered"] = False
+
+    global_styles = _global_css()
+    sidebar_styles = _sidebar_css()
+
+    custom_css = "<style>\n" + global_styles + "\n" + sidebar_styles + "\n</style>"
     st.markdown(custom_css, unsafe_allow_html=True)
 
 
+
 def render_sidebar_branding():
-    """Renders compact executive BankerEye branding card at top of sidebar."""
+    """Renders compact executive BankerEye branding card at top of sidebar.
+
+    Idempotent: renders at most once per page lifecycle and takes no required arguments.
+    """
+    if st.session_state.get("_sidebar_branding_rendered", False):
+        return
+    st.session_state["_sidebar_branding_rendered"] = True
+
     branding_html = """
     <div class="sidebar-brand-card">
         <div class="sidebar-brand-header">
@@ -1084,8 +1128,16 @@ def render_sidebar_branding():
     st.markdown(branding_html, unsafe_allow_html=True)
 
 
+
 def render_sidebar_footer():
-    """Renders small muted metadata and copyright footer pinned to bottom of sidebar."""
+    """Renders small muted metadata and copyright footer pinned to bottom of sidebar.
+
+    Idempotent: renders at most once per page lifecycle and takes no required arguments.
+    """
+    if st.session_state.get("_sidebar_footer_rendered", False):
+        return
+    st.session_state["_sidebar_footer_rendered"] = True
+
     footer_html = """
     <div class="sidebar-footer-card">
         <div class="sidebar-footer-divider"></div>
