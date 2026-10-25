@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -15,11 +14,6 @@ from frontend.utils.api_client import (
     get_dataset_sample,
 )
 from frontend.components.cards import render_kpi_card, render_info_banner
-
-try:
-    st.set_page_config(page_title="Batch Prediction | BankerEye ML", page_icon="📁", layout="wide")
-except Exception:
-    pass
 
 st.markdown(
     """
@@ -53,7 +47,7 @@ col_up, col_template = st.columns([2.5, 1])
 
 with col_template:
     st.markdown("##### Need a Test CSV?")
-    st.caption("Download a sample batch file with valid records extracted from the test partition.")
+    st.caption("first 25 rows of the dataset")
     sample_records = get_dataset_sample(limit=25)
     if sample_records:
         df_sample_template = pd.DataFrame(sample_records)
@@ -65,7 +59,7 @@ with col_template:
             data=template_csv,
             file_name="sample_batch_customers.csv",
             mime="text/csv",
-            use_container_width=True,
+            width="stretch",
         )
 
 with col_up:
@@ -88,10 +82,10 @@ if uploaded_file is not None:
         df_upload = pd.read_csv(uploaded_file, sep=None, engine="python")
         st.markdown("#### Uploaded File Preview")
         st.caption(f"Loaded {len(df_upload)} rows and {len(df_upload.columns)} columns.")
-        st.dataframe(df_upload.head(10), use_container_width=True, height=220)
+        st.dataframe(df_upload.head(10), width="stretch", height=220)
 
         # Execute Batch Prediction
-        if st.button("🚀 Run Batch Prediction", type="primary", use_container_width=True):
+        if st.button("🚀 Run Batch Prediction", type="primary", width="stretch"):
             with st.spinner("Processing batch records through the trained pipeline..."):
                 resp = predict_batch_csv(df=df_upload, model_name=model_choice)
 
@@ -156,7 +150,7 @@ if uploaded_file is not None:
                         font=dict(size=11, family="Inter", color="#334155"),
                     ),
                 )
-                st.plotly_chart(fig_batch_pie, use_container_width=True)
+                st.plotly_chart(fig_batch_pie, width="stretch")
 
                 # Attach predictions to original dataframe
                 results_data = resp.get("results", [])
@@ -165,7 +159,7 @@ if uploaded_file is not None:
                 df_results["subscription_probability"] = [r["probability"] for r in results_data]
 
                 st.markdown("#### Detailed Prediction Results Table")
-                st.dataframe(df_results, use_container_width=True, height=350)
+                st.dataframe(df_results, width="stretch", height=350)
 
                 # Downloadable Results CSV
                 results_csv = df_results.to_csv(index=False)
@@ -177,7 +171,12 @@ if uploaded_file is not None:
                     type="primary",
                 )
             else:
-                st.error(f"Batch prediction error: {resp.get('message')}")
+                st.error(f"Batch prediction error: {resp.get('message', 'Validation error')}")
+                val_errors = resp.get("validation_errors", [])
+                if val_errors:
+                    st.markdown(f"##### ⚠️ Per-Row Validation Errors ({len(val_errors)} detected)")
+                    df_errors = pd.DataFrame(val_errors)
+                    st.dataframe(df_errors, width="stretch", hide_index=True)
 
     except Exception as e:
         st.error(f"Error parsing uploaded file: {e}")

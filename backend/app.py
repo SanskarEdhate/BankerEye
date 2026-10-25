@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import uuid
 from pathlib import Path
 
 # Add project root to sys.path if not present
@@ -16,6 +17,7 @@ from backend.config import (
     FLASK_PORT,
     FLASK_DEBUG,
     SAVED_MODELS_DIR,
+    EXPECTED_MODEL_FILES,
 )
 from backend.services.preprocessing import resolve_dataset_path
 from backend.routes.dataset_routes import dataset_bp
@@ -33,20 +35,41 @@ logger = logging.getLogger("backend")
 def create_app() -> Flask:
     """Application factory for the Flask REST API."""
     app = Flask(__name__)
-    app.config["JSON_SORT_KEYS"] = False
+    app.json.sort_keys = False
+    app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB payload cap
 
-    # Configure CORS for local development and Streamlit frontend
-    CORS(
-        app,
-        resources={r"/api/*": {"origins": ["http://localhost:8501", "http://127.0.0.1:8501", "*"]}},
-        supports_credentials=True,
-    )
+    # Configure CORS: allow all origins by default in production or explicit list from env
+    cors_origins_env = os.getenv("CORS_ORIGINS", "*").strip()
+    if cors_origins_env == "*" or not cors_origins_env:
+        CORS(app, resources={r"/api/*": {"origins": "*"}, r"/*": {"origins": "*"}})
+    else:
+        allowed_origins = [o.strip() for o in cors_origins_env.split(",") if o.strip()]
+        CORS(app, resources={r"/api/*": {"origins": allowed_origins}, r"/*": {"origins": allowed_origins}})
 
     # Register blueprints
     app.register_blueprint(dataset_bp)
     app.register_blueprint(model_bp)
     app.register_blueprint(prediction_bp)
     app.register_blueprint(report_bp)
+
+    @app.route("/", methods=["GET"])
+    def root_index():
+        """Root endpoint confirming service operational status."""
+        return jsonify(
+            {
+                "status": "online",
+                "service": "BankerEye Machine Learning API",
+                "version": "1.0.0",
+                "health": "/api/health",
+                "endpoints": [
+                    "/api/health",
+                    "/api/dataset/summary",
+                    "/api/models/compare",
+                    "/api/predict",
+                    "/api/reports/evaluation",
+                ],
+            }
+        ), 200
 
     @app.route("/api/health", methods=["GET"])
     def health_check():
@@ -61,9 +84,10 @@ def create_app() -> Flask:
         except Exception:
             dataset_available = False
 
-        # Check if models have been trained and serialized
+        # Check if models have been trained and serialized (all 4 joblibs + metrics JSON)
         metrics_file = SAVED_MODELS_DIR / "model_metrics.json"
-        models_trained = metrics_file.exists()
+        all_joblib_exist = all((SAVED_MODELS_DIR / fname).exists() for fname in EXPECTED_MODEL_FILES)
+        models_trained = metrics_file.exists() and all_joblib_exist
 
         return jsonify(
             {
@@ -73,7 +97,6 @@ def create_app() -> Flask:
                 "dataset_available": dataset_available,
                 "dataset_file": dataset_name,
                 "models_trained": models_trained,
-                "environment": os.getenv("FLASK_ENV", "production"),
             }
         ), 200
 
@@ -85,10 +108,22 @@ def create_app() -> Flask:
     def handle_method_not_allowed(e):
         return jsonify({"status": "error", "message": "HTTP Method not allowed"}), 405
 
+    @app.errorhandler(413)
+    def handle_payload_too_large(e):
+        return jsonify({
+            "status": "error",
+            "message": "Uploaded payload exceeds the maximum allowed file size limit of 10MB.",
+        }), 413
+
     @app.errorhandler(500)
     def handle_internal_error(e):
-        logger.error(f"Internal server error: {e}")
-        return jsonify({"status": "error", "message": "An internal server error occurred."}), 500
+        req_id = str(uuid.uuid4())
+        logger.exception(f"Internal server error [req_id={req_id}]: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "An internal server error occurred.",
+            "request_id": req_id,
+        }), 500
 
     return app
 

@@ -3,7 +3,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Framework-Flask%20%7C%20Streamlit-orange.svg)](https://streamlit.io/)
 [![Machine Learning](https://img.shields.io/badge/ML-Scikit--Learn-green.svg)](https://scikit-learn.org/)
-[![Tests Passing](https://img.shields.io/badge/tests-34%20passed-brightgreen.svg)]()
+[![Tests Passing](https://img.shields.io/badge/tests-60%20passed-brightgreen.svg)]()
 
 An end-to-end Machine Learning web application and REST API engineered to optimize direct telemarketing campaigns for retail banking institutions. The system predicts prospective customer propensity to subscribe to long-term deposits using historical campaign data, benchmarks four supervised algorithms, and enforces an anti-leakage architecture.
 
@@ -35,12 +35,16 @@ By analyzing customer demographics, financial liquidity, credit obligations, and
 ## 🌟 Key Features
 - **Anti-Leakage Machine Learning Pipeline:** Call duration (`duration`) is strictly excluded from feature inputs, guaranteeing realistic pre-contact predictions.
 - **Empirical 4-Model Benchmark:** Trains and compares Logistic Regression, Decision Tree, K-Nearest Neighbours (KNN), and Random Forest on an identical held-out test split (80/20 stratified).
+- **Cost-Sensitive Class Balancing:** `class_weight='balanced'` is enforced on Logistic Regression, Decision Tree, and Random Forest to mitigate the 88.3% / 11.7% class imbalance (KNN has no native `class_weight` parameter, which is rigorously documented).
+- **Isotonic Probability Calibration:** Every pipeline is wrapped in `CalibratedClassifierCV(method="isotonic", cv=3)` fitted on training data, delivering low Brier scores (< 0.090) and reliable probabilities.
+- **Validation-Tuned Decision Thresholds:** Optimal decision thresholds are chosen on a validation split carved strictly from the training partition to maximize the F1-score.
+- **Bootstrap 95% Confidence Intervals:** 500-sample percentile bootstrap confidence intervals prevent overconfident claims of algorithmic superiority when intervals overlap.
 - **Dual Inference Engine:**
   - *Interactive Profiler:* Form-based single-customer scoring with dynamic conversion probability gauges and behavioral driver insights.
   - *Bulk CSV Batch Processor:* High-throughput multi-row CSV upload with real-time conversion summaries and exportable scored files.
 - **Full-Stack Decoupled Architecture:** Modular Flask REST API backend paired with a responsive Streamlit analytics dashboard.
 - **Automated Academic Reporting:** Dynamically generates structured evaluation JSON, comparative CSV metrics, and formal PDF evaluation reports via ReportLab.
-- **Comprehensive Pytest Suite:** 34 automated unit and integration tests covering preprocessing, model training, prediction validation, and API routes.
+- **Comprehensive Pytest Suite:** 60 automated unit and integration tests covering preprocessing, model training, prediction validation, API routes, and system hardening.
 
 ---
 
@@ -76,8 +80,9 @@ The original UCI dataset contains `duration` (the last contact call duration in 
         +-------------------------------+             +-------------------------------+
         |     Preprocessing Engine      |             |     ML Inference Engine       |
         | - Auto Delimiter Detection    |             | - 4 Scikit-Learn Pipelines    |
+        | - PdaysFeatureEngineer        |             | - Isotonic Calibration (CV=3) |
         | - Duration Exclusion Guard    |             | - Single & Batch Predictors   |
-        | - ColumnTransformer Pipeline  |             | - Probability Calibration     |
+        | - ColumnTransformer Pipeline  |             | - Validation-Tuned Thresholds |
         +---------------+---------------+             +---------------+---------------+
                         |                                             |
                         +----------------------+----------------------+
@@ -95,27 +100,28 @@ The original UCI dataset contains `duration` (the last contact call duration in 
 ## 📈 Empirical Benchmark Results
 All four models were trained on 36,168 rows (80%) and evaluated on the held-out test partition of 9,043 rows (20%) with stratified class proportions:
 
-| Algorithm | Accuracy | Precision (yes) | Recall (yes) | F1-Score (yes) | ROC-AUC | Training Time | Latency |
-|---|---|---|---|---|---|---|---|
-| **Random Forest** | 81.43% | 32.55% | 59.26% | 42.08% | **79.46%** | 3.25s | 45.2ms |
-| **Decision Tree** | 80.38% | 32.14% | **62.48%** | **42.18%** | 75.02% | 0.28s | 8.5ms |
-| **Logistic Regression** | 75.48% | 26.62% | 62.38% | 37.32% | 77.22% | 0.51s | 3.5ms |
-| **KNN Classifier** | **87.15%** | 39.40% | 22.87% | 28.94% | 72.66% | 0.12s | 340.0ms |
+| Algorithm | Accuracy | Precision (yes) | Recall (yes) | F1-Score (yes) | 95% Bootstrap CI (F1) | ROC-AUC | 95% CI (ROC-AUC) | Brier Score | Optimal Threshold |
+|---|---|---|---|---|---|---|---|---|---|
+| **Random Forest** | 86.97% | 44.91% | 50.00% | 47.32% | [0.4464, 0.4965] | **79.86%** | [0.7841, 0.8138] | **0.0822** | 0.22 |
+| **Decision Tree** | **88.00%** | **48.66%** | 46.41% | **47.51%** | [0.4468, 0.5011] | 77.76% | [0.7611, 0.7947] | 0.0834 | 0.22 |
+| **Logistic Regression** | 87.84% | 47.76% | 42.34% | 44.89% | [0.4217, 0.4732] | 77.20% | [0.7578, 0.7889] | 0.0850 | 0.25 |
+| **KNN Classifier** | 86.42% | 41.13% | 37.24% | 39.09% | [0.3649, 0.4179] | 72.33% | [0.7056, 0.7416] | 0.0897 | 0.17 |
 
 ### Key Analytical Takeaways
-- **The Accuracy Paradox:** KNN attained the highest raw accuracy (87.15%) because it biased heavily toward the 88.3% majority class, but it missed over 77% of actual depositors (Recall: 22.87%).
-- **Ensemble Dominance:** Random Forest delivered the highest discriminative power (ROC-AUC: 79.46%).
-- **Balanced Harmonic Lead:** Decision Tree delivered top F1-Score (42.18%) and top Recall (62.48%), capturing the largest proportion of viable depositors.
+- **Statistical Distinguishability:** The 95% bootstrap confidence intervals for Decision Tree [0.4468, 0.5011] and Random Forest [0.4464, 0.4965] overlap on this test set. Therefore, their predictive performances are **not statistically distinguishable**, and neither algorithm can be claimed as strictly superior.
+- **Class Weighting:** `class_weight='balanced'` is enforced on Logistic Regression, Decision Tree, and Random Forest. Scikit-learn's `KNeighborsClassifier` does not support class weights, as documented.
+- **Probability Calibration:** Wrapping models in `CalibratedClassifierCV(method="isotonic", cv=3)` fitted on the training set produces well-calibrated posterior probabilities, verified by low Brier scores (< 0.090 across all models).
+- **The Accuracy Paradox:** Because 88.3% of customers do not subscribe, a trivial model predicting 'No' universally achieves 88.30% accuracy while capturing zero subscribers. Our models deliberately prioritize F1-score and Recall over raw accuracy.
 
 ---
 
 ## 📚 Verified Literature Review
-This system incorporates empirical insights from five verified peer-reviewed research papers (2021–2024):
-1. **Alessa et al. (2023)** — *Banking in Terms of Deposit Prediction Based on Machine Learning and Big Data Analytics*, IEEE ICCMA, [DOI: 10.1109/ICCMA59762.2023.10374595](https://doi.org/10.1109/ICCMA59762.2023.10374595).
-2. **Singh et al. (2024)** — *Enhancing Marketing Strategies: Analyzing Customer Behavior in Banking through Data Analysis and Machine Learning*, IEEE TIACOMP, [DOI: 10.1109/TIACOMP64125.2024.00085](https://doi.org/10.1109/TIACOMP64125.2024.00085).
-3. **Dixit & Kokila (2024)** — *Innovative Approaches of Machine Learning to Enhance Predictive Analytics Based on Banking Institution Strategies*, IEEE ICONAT, [IEEE Doc: 10700543](https://ieeexplore.ieee.org/document/10700543).
-4. **Tanvir et al. (2024)** — *Bayesian Regression for Predicting Subscription to Bank Term Deposits in Direct Marketing Campaigns*, IEEE DASA / arXiv, [DOI: 10.48550/arXiv.2410.21539](https://doi.org/10.48550/arXiv.2410.21539).
-5. **Khan et al. (2021)** — *A Study on Improving Banking Process for Predicting Prospective Customers of Term Deposits Using Explainable Machine Learning Models*, Springer LNCS, [DOI: 10.1007/978-3-030-87010-9_8](https://doi.org/10.1007/978-3-030-87010-9_8).
+This system incorporates empirical insights from scholarly research papers (2021–2024), individually audited for citation authenticity:
+1. **Alessa et al. (2023)** — *Banking in Terms of Deposit Prediction Based on Machine Learning and Big Data Analytics*, IEEE ICCMA, [DOI: 10.1109/ICCMA59762.2023.10374595](https://doi.org/10.1109/ICCMA59762.2023.10374595) *(Unverified, check before citing)*.
+2. **Singh et al. (2024)** — *Enhancing Marketing Strategies: Analyzing Customer Behavior in Banking through Data Analysis and Machine Learning*, IEEE TIACOMP, [DOI: 10.1109/TIACOMP64125.2024.00085](https://doi.org/10.1109/TIACOMP64125.2024.00085) *(Unverified, check before citing)*.
+3. **Dixit & Kokila (2024)** — *Innovative Approaches of Machine Learning to Enhance Predictive Analytics Based on Banking Institution Strategies*, IEEE ICONAT, [IEEE Doc: 10700543](https://ieeexplore.ieee.org/document/10700543) *(Unverified, check before citing)*.
+4. **Tanvir et al. (2024)** — *Bayesian Regression for Predicting Subscription to Bank Term Deposits in Direct Marketing Campaigns*, IEEE DASA / arXiv, [DOI: 10.48550/arXiv.2410.21539](https://doi.org/10.48550/arXiv.2410.21539) *(Verified)*.
+5. **Khan et al. (2021)** — *A Study on Improving Banking Process for Predicting Prospective Customers of Term Deposits Using Explainable Machine Learning Models*, Springer LNCS, [DOI: 10.1007/978-3-030-87010-9_8](https://doi.org/10.1007/978-3-030-87010-9_8) *(Unverified, check before citing)*.
 
 ---
 
@@ -123,65 +129,50 @@ This system incorporates empirical insights from five verified peer-reviewed res
 ```
 bank-marketing-ml/
 ├── dataset/
-│   ├── bank-full.csv                  # Canonical 45,211 row dataset (semicolon delimited)
-│   ├── bank.csv                       # 10% test sample (4,521 rows)
-│   └── bank-names.txt                 # Official UCI attribute documentation
+│   ├── Data Cleaning & Splitting/     # Standardized 5-stage data hierarchy
+│   │   ├── 1_uci_bank_marketing_canonical/
+│   │   │   ├── 01_Raw_Data/
+│   │   │   ├── 02_Unclean_Data/
+│   │   │   ├── 03_Clean_Data/
+│   │   │   ├── 04_Train_Data/
+│   │   │   └── 05_Test_Data/
+│   │   └── dataset_manifest.json      # Structured dataset registry
 ├── backend/
-│   ├── __init__.py
-│   ├── app.py                         # Flask application factory, CORS, health route
-│   ├── config.py                      # System paths, constants, environment settings
+│   ├── app.py                         # Flask factory, error handling, CORS, health route
+│   ├── config.py                      # Configuration, paths, feature definitions
 │   ├── routes/
-│   │   ├── __init__.py
-│   │   ├── dataset_routes.py          # /api/dataset/summary, /api/dataset/sample
-│   │   ├── model_routes.py            # /api/models/train, /api/models/compare, metrics
-│   │   ├── prediction_routes.py       # /api/predict, /api/predict/batch
-│   │   └── report_routes.py           # /api/reports/evaluation, /api/reports/pdf
+│   │   ├── dataset_routes.py          # Summary, sample, catalog, manifest endpoints
+│   │   ├── model_routes.py            # Async training, status polling, comparison, metrics
+│   │   ├── prediction_routes.py       # Single & batch prediction endpoints
+│   │   └── report_routes.py           # Evaluation report, metrics CSV, PDF downloads
 │   ├── services/
-│   │   ├── __init__.py
-│   │   ├── preprocessing.py           # Delimiter sniffer, ColumnTransformer, split
-│   │   ├── train_models.py            # 4 pipeline trainers, metric evaluator, joblib
-│   │   ├── prediction.py              # Validation, inference, probabilities
+│   │   ├── preprocessing.py           # Delimiter sniffer, ColumnTransformer, PdaysFeatureEngineer
+│   │   ├── train_models.py            # GridSearch CV, isotonic calibration, bootstrap CIs
+│   │   ├── prediction.py              # Strict input validation, dynamic risk tiers, consensus
 │   │   └── report_service.py          # ReportLab PDF and metrics CSV generator
-│   └── saved_models/
-│       ├── logistic_regression_pipeline.joblib
-│       ├── decision_tree_pipeline.joblib
-│       ├── knn_pipeline.joblib
-│       ├── random_forest_pipeline.joblib
-│       ├── model_metrics.json
-│       └── evaluation_summary.json
+│   └── saved_models/                  # Serialized .joblib pipelines and JSON metrics
 ├── frontend/
-│   ├── streamlit_app.py               # Application router, modern st.navigation, executive layout
+│   ├── streamlit_app.py               # Root application router and sidebar navigation
 │   ├── views/
-│   │   ├── Home.py                    # Executive overview, KPI metric cards, navigation module hub
-│   │   ├── 1_Dashboard.py             # Top KPIs, class donut chart, quick actions
-│   │   ├── 2_Dataset_Explorer.py      # Data preview, schema, descriptive stats, EDA
-│   │   ├── 3_Model_Comparison.py      # 4 cards, metric rankings, ROC, confusion matrix
-│   │   ├── 4_Subscription_Predictor.py# Customer input form, gauge chart, insights
-│   │   ├── 5_Batch_Prediction.py      # Bulk CSV upload, summary, exportable results
-│   │   └── 6_Reports_and_Insights.py  # Literature review, PDF/CSV download center
+│   │   ├── Home.py                    # System navigation and dynamic KPI overview
+│   │   ├── 1_Dashboard.py             # Operational KPIs, class donut chart, training trigger
+│   │   ├── 2_Dataset_Explorer.py      # Multi-stage data preview, schema, descriptive stats
+│   │   ├── 3_Model_Comparison.py      # Comparative rankings, CIs, temporal checks, ROC
+│   │   ├── 4_Subscription_Predictor.py# Profiling form, single model & consensus evaluation
+│   │   ├── 5_Batch_Prediction.py      # High-throughput CSV upload and error reporting
+│   │   └── 6_Reports_and_Insights.py  # Literature review audit and report downloads
 │   ├── components/
-│   │   ├── __init__.py
-│   │   ├── cards.py                   # KPI metric cards, info callout banners
-│   │   └── charts.py                  # Plotly ROC curves, bars, confusion matrices
+│   │   ├── cards.py                   # Reusable KPI and info callout cards
+│   │   └── charts.py                  # Plotly gauges, ROC curves, confusion matrices
 │   └── utils/
-│       ├── __init__.py
-│       ├── api_client.py              # Requests wrapper with timeouts and fallbacks
-│       └── styling.py                 # Custom CSS banking analytics theme
-├── tests/
-│   ├── __init__.py
-│   ├── conftest.py                    # Pytest test fixtures and client setup
-│   ├── test_preprocessing.py          # Delimiter, loading, anti-leakage checks
-│   ├── test_models.py                 # Pipeline loading, metrics integrity
-│   ├── test_prediction.py             # Single & batch inference, validation
-│   └── test_api.py                    # Flask HTTP routes, status codes
-├── reports/
-│   ├── academic_project_report.md     # 22-section comprehensive college report
-│   ├── academic_evaluation_report.pdf # Generated PDF evaluation document
-│   └── literature_review.md           # Deep-dive 5 paper comparison matrix
-├── requirements.txt                   # Verified dependency versions
+│       ├── api_client.py              # Requests client with Streamlit cache_data (ttl=60)
+│       └── styling.py                 # Banking-grade CSS theme and responsive sidebar
+├── tests/                             # Comprehensive automated test suite
+├── reports/                           # Academic Markdown, PDF, and literature review files
+├── requirements.txt                   # Pinned runtime dependencies
+├── requirements-dev.txt               # Testing and linting dependencies
 ├── .env.example                       # Environment template
-├── .gitignore                         # Clean git repository hygiene
-└── README.md                          # Complete system documentation
+└── README.md                          # Repository documentation
 ```
 
 ---
@@ -195,16 +186,24 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
-### Step 2: Start the Flask Backend API (Terminal 1)
+### Step 2: Train Models (Train First)
+Before launching services or executing tests, train and calibrate all four models:
+```powershell
+python -m backend.services.train_models
+```
+*This executes 5-fold cross-validated grid search, isotonic calibration (cv=3), optimal threshold tuning, and 500-iteration bootstrap confidence intervals, saving all pipelines into `backend/saved_models/`.*
+
+### Step 3: Start the Flask Backend API (Terminal 1)
 ```powershell
 .\venv\Scripts\Activate.ps1
 python backend/app.py
 ```
 *The API will start and listen on `http://127.0.0.1:5000`.*
 
-### Step 3: Start the Streamlit Analytics UI (Terminal 2)
+### Step 4: Start the Streamlit Analytics UI (Terminal 2)
 Open a second PowerShell window:
 ```powershell
 .\venv\Scripts\Activate.ps1
@@ -212,92 +211,48 @@ streamlit run frontend/streamlit_app.py
 ```
 *The Streamlit web dashboard will open in your browser at `http://localhost:8501`.*
 
-> **Important Note:** Both the Flask backend and the Streamlit frontend must be running simultaneously for full operational functionality.
-
 ---
 
 ## 📡 REST API Endpoint Reference
 
-### Operational & Dataset Endpoints
-- `GET /api/health` — Verifies API health, dataset availability, and trained model status.
-- `GET /api/dataset/summary` — Returns row/col counts, datatypes, missing values, and class distributions.
-- `GET /api/dataset/sample?limit=10` — Returns a bounded preview of dataset records.
-
-### Model & Training Endpoints
-- `POST /api/models/train` — Retrains all four models under stratified split and saves evaluation artifacts.
-  ```json
-  { "test_size": 0.20, "force_retrain": true }
-  ```
-- `GET /api/models/compare` — Returns actual evaluation metrics, ROC curve data, and rankings.
-- `GET /api/models/{model_name}/metrics` — Returns metrics and confusion matrix for a specific model (`random_forest`, `decision_tree`, `logistic_regression`, `knn`).
-- `GET /api/models/feature-importance` — Returns top predictive features with non-causal disclaimer.
-
-### Inference Endpoints
-- `POST /api/predict` — Evaluates a single customer profile:
-  ```json
-  {
-    "model": "random_forest",
-    "features": {
-      "age": 42,
-      "job": "management",
-      "marital": "married",
-      "education": "tertiary",
-      "default": "no",
-      "balance": 3200,
-      "housing": "no",
-      "loan": "no",
-      "contact": "cellular",
-      "day": 18,
-      "month": "aug",
-      "campaign": 1,
-      "pdays": -1,
-      "previous": 0,
-      "poutcome": "unknown"
-    }
-  }
-  ```
-- `POST /api/predict/batch` — Accepts array of customer dictionaries or multipart CSV upload for batch inference.
-
-### Report Download Endpoints
-- `GET /api/reports/evaluation` — Returns structured JSON evaluation summary.
-- `GET /api/reports/metrics-csv` — Downloads comparative metrics CSV table.
-- `GET /api/reports/pdf` — Downloads formal academic PDF evaluation report.
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Returns operational health status and verifies all 4 `.joblib` models and metrics JSON exist. |
+| `GET` | `/api/dataset/summary` | Returns dataset row/col counts, data types, missing values, and distributions. |
+| `GET` | `/api/dataset/sample?limit=15` | Returns a sample of preview records with NaN converted to None. |
+| `GET` | `/api/dataset/catalog` | Returns the dynamic catalog of all organized dataset folders with file-computed row counts. |
+| `GET` | `/api/dataset/manifest` | Returns the full dataset manifest with forward-slash relative paths. |
+| `POST` | `/api/models/train` | Dispatches background training thread; returns 202 Accepted + `job_id` immediately. |
+| `GET` | `/api/models/train/status` | Returns training job state (`idle`, `running`, `done`, `failed`), progress, and message. |
+| `GET` | `/api/models/compare` | Returns measured evaluation metrics, rankings, 95% CIs, and temporal check table. |
+| `GET` | `/api/models/<name>/metrics` | Returns metrics and confusion matrix for a specific model key. |
+| `GET` | `/api/models/feature-importance` | Returns grouped permutation feature importances for ensemble models. |
+| `POST` | `/api/predict` | Validates customer JSON payload and returns prediction, calibrated probability, and risk tier. |
+| `POST` | `/api/predict/all` | Runs single customer through all 4 models simultaneously, computing calibrated ensemble consensus. |
+| `POST` | `/api/predict/batch` | Validates rows strictly, returning row-by-row error reasons (400) or predictions. |
+| `GET` | `/api/reports/evaluation` | Returns structured evaluation summary JSON. |
+| `GET` | `/api/reports/metrics-csv` | Streams downloadable metrics comparison CSV. |
+| `GET` | `/api/reports/pdf` | Dynamically generates and streams formal ReportLab evaluation PDF report. |
 
 ---
 
 ## 🧪 Running Automated Tests
-The repository includes a comprehensive 34-test suite built with Pytest:
+Run the automated test suite using `pytest`:
 ```powershell
-python -m pytest -v
+pytest tests/ -q
 ```
-All 34 tests validate dataset integrity, delimiter detection, leakage prevention, model pipelines, input boundaries, batch prediction, and Flask API endpoints.
+*All tests derive assertions dynamically from the saved metrics JSON and configuration, including mock model bootstrapping in conftest for clean test runs.*
 
 ---
 
-## 🔧 Troubleshooting Guide
-1. **Flask API Offline in Streamlit:**  
-   Ensure `python backend/app.py` is actively running in Terminal 1 on port 5000. Verify the health status via `http://127.0.0.1:5000/api/health`.
-2. **Missing Dataset Error:**  
-   Confirm `bank-full.csv` is present in the `dataset/` directory. If using a custom path, configure `DATASET_PATH` in `.env`.
-3. **PowerShell Script Execution Policy Warning:**  
-   If activating the virtual environment throws an execution policy error, run:
-   ```powershell
-   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-   ```
-
----
-
-## 📜 License & Academic Citation
-Developed for academic assessment and educational research under the MIT License.
-
+## 📄 License & Academic Citation
+Developed for academic machine learning research and engineering evaluation.
+If using this project in academic research, please cite:
 ```bibtex
-@article{moro2014data,
-  title={A data-driven approach to predict the success of bank telemarketing},
-  author={Moro, S{\'e}rgio and Cortez, Paulo and Rita, Paulo},
-  journal={Decision Support Systems},
-  volume={62},
-  pages={22--31},
-  year={2014},
-  publisher={Elsevier}
+@misc{bankereye2025,
+  title={BankerEye: Bank Marketing Subscription Prediction System Using Machine Learning},
+  author={BankerEye Engineering Team},
+  year={2025},
+  publisher={GitHub}
 }
 ```

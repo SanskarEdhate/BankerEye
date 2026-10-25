@@ -1,4 +1,6 @@
+import io
 import logging
+import uuid
 from flask import Blueprint, jsonify, request
 import pandas as pd
 
@@ -20,25 +22,46 @@ def predict_all():
     and returns per-model predictions, benchmark accuracy, and consensus.
     """
     try:
-        data = request.get_json(silent=True)
-        if not data:
+        # Enforce valid JSON object body
+        if not request.is_json:
             return jsonify({
                 "status": "error",
-                "message": "Invalid request body. JSON payload is required.",
+                "message": "Request content-type must be application/json.",
+            }), 400
+
+        data = request.get_json(silent=True)
+        if data is None or not isinstance(data, dict):
+            return jsonify({
+                "status": "error",
+                "message": "Invalid request body. JSON body must be an object.",
             }), 400
 
         features = data.get("features", data)
+        if not isinstance(features, dict):
+            return jsonify({
+                "status": "error",
+                "message": "Field 'features' must be a JSON object (dictionary).",
+            }), 400
+
         result = predict_all_models_single_customer(features=features)
         return jsonify(result), 200
 
     except ValueError as e:
         return jsonify({"status": "error", "message": str(e)}), 422
     except FileNotFoundError as e:
-        return jsonify({"status": "error", "message": str(e)}), 404
+        logger.warning(f"Predict all requested before training: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "Models not trained. Run: python -m backend.services.train_models",
+        }), 503
     except Exception as e:
-        logger.error(f"Multi-model prediction exception: {e}")
-        return jsonify({"status": "error", "message": f"Prediction failed: {str(e)}"}), 500
-
+        req_id = str(uuid.uuid4())
+        logger.exception(f"Multi-model prediction exception [req_id={req_id}]: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "An internal server error occurred.",
+            "request_id": req_id,
+        }), 500
 
 
 @prediction_bp.route("/predict", methods=["POST"])
@@ -48,20 +71,42 @@ def predict():
     and returns class prediction, probability, and contextual insights.
     """
     try:
-        data = request.get_json(silent=True)
-        if not data:
+        if not request.is_json:
             return jsonify({
                 "status": "error",
-                "message": "Invalid request body. JSON payload is required.",
+                "message": "Request content-type must be application/json.",
             }), 400
 
-        features = data.get("features", data)
-        model_name = data.get("model", "random_forest").lower().strip()
+        data = request.get_json(silent=True)
+        if data is None or not isinstance(data, dict):
+            return jsonify({
+                "status": "error",
+                "message": "Invalid request body. JSON body must be an object.",
+            }), 400
+
+        # Validate 'model' field strictly
+        if "model" in data:
+            model_val = data["model"]
+            if model_val is None or not isinstance(model_val, str) or not model_val.strip():
+                return jsonify({
+                    "status": "error",
+                    "message": "Field 'model' must be a non-empty string.",
+                }), 400
+            model_name = model_val.lower().strip()
+        else:
+            model_name = "random_forest"
 
         if model_name not in MODEL_DEFINITIONS:
             return jsonify({
                 "status": "error",
                 "message": f"Unsupported model '{model_name}'. Allowed: {list(MODEL_DEFINITIONS.keys())}",
+            }), 400
+
+        features = data.get("features", data)
+        if not isinstance(features, dict):
+            return jsonify({
+                "status": "error",
+                "message": "Field 'features' must be a JSON object (dictionary).",
             }), 400
 
         result = predict_single_customer(features=features, model_name=model_name)
@@ -70,43 +115,115 @@ def predict():
     except ValueError as e:
         return jsonify({"status": "error", "message": str(e)}), 422
     except FileNotFoundError as e:
-        return jsonify({"status": "error", "message": str(e)}), 404
+        logger.warning(f"Predict requested before training: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "Models not trained. Run: python -m backend.services.train_models",
+        }), 503
     except Exception as e:
-        logger.error(f"Prediction exception: {e}")
-        return jsonify({"status": "error", "message": f"Prediction failed: {str(e)}"}), 500
+        req_id = str(uuid.uuid4())
+        logger.exception(f"Prediction exception [req_id={req_id}]: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "An internal server error occurred.",
+            "request_id": req_id,
+        }), 500
 
 
 @prediction_bp.route("/predict/batch", methods=["POST"])
 def predict_batch():
     """
-    Accepts multiple customer records and returns predictions in the same order.
-    Supports either JSON array in payload or multipart file upload (CSV).
+    Accepts batch records via multipart CSV file upload or JSON payload.
+    Validates delimiter with detect_csv_delimiter and validates every row.
     """
     try:
-        model_name = request.form.get("model", "random_forest")
-        if "file" in request.files:
+        model_name = "random_forest"
+        if request.content_type and "multipart/form-data" in request.content_type:
+            model_param = request.form.get("model", "random_forest")
+            if not isinstance(model_param, str) or not model_param.strip():
+                return jsonify({"status": "error", "message": "Field 'model' must be a string."}), 400
+            model_name = model_param.lower().strip()
+
+            if "file" not in request.files:
+                return jsonify({"status": "error", "message": "No file part in multipart request."}), 400
+
             file = request.files["file"]
             if file.filename == "":
-                return jsonify({"status": "error", "message": "No file selected."}), 400
-            # Read CSV file
-            df_records = pd.read_csv(file)
-        else:
-            data = request.get_json(silent=True)
-            if not data:
-                return jsonify({"status": "error", "message": "JSON body or file upload required."}), 400
-            records = data.get("records", [])
-            model_name = data.get("model", model_name)
-            if not records:
-                return jsonify({"status": "error", "message": "'records' array is empty."}), 400
-            df_records = pd.DataFrame(records)
+                return jsonify({"status": "error", "message": "No file selected for upload."}), 400
 
-        result = predict_batch_customers(df_records=df_records, model_name=model_name)
-        return jsonify(result), 200
+            # Read raw bytes to detect delimiter and construct DataFrame
+            raw_bytes = file.read()
+            if not raw_bytes:
+                return jsonify({"status": "error", "message": "Uploaded CSV file is empty."}), 400
+
+            # Sniff delimiter from sample
+            sample_str = raw_bytes[:4096].decode("utf-8", errors="ignore")
+            first_line = sample_str.splitlines()[0] if sample_str.splitlines() else ""
+            delim = ";" if first_line.count(";") > first_line.count(",") else ","
+
+            try:
+                df_records = pd.read_csv(io.BytesIO(raw_bytes), sep=delim)
+            except Exception as e:
+                return jsonify({"status": "error", "message": f"Malformed CSV file: {e}"}), 400
+
+        elif request.is_json:
+            data = request.get_json(silent=True)
+            if data is None or not isinstance(data, dict):
+                return jsonify({
+                    "status": "error",
+                    "message": "JSON body must be an object with 'records' list.",
+                }), 400
+
+            if "model" in data:
+                m_val = data["model"]
+                if m_val is None or not isinstance(m_val, str) or not m_val.strip():
+                    return jsonify({"status": "error", "message": "Field 'model' must be a string."}), 400
+                model_name = m_val.lower().strip()
+
+            records = data.get("records")
+            if not isinstance(records, list) or not records:
+                return jsonify({"status": "error", "message": "Field 'records' must be a non-empty list."}), 400
+
+            df_records = pd.DataFrame(records)
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "Content-Type must be application/json or multipart/form-data.",
+            }), 400
+
+        if model_name not in MODEL_DEFINITIONS:
+            return jsonify({
+                "status": "error",
+                "message": f"Unsupported model '{model_name}'. Choose from: {list(MODEL_DEFINITIONS.keys())}",
+            }), 400
+
+        # Run batch prediction with row-by-row validation
+        results = predict_batch_customers(df_records=df_records, model_name=model_name)
+        return jsonify(results), 200
 
     except ValueError as e:
-        return jsonify({"status": "error", "message": str(e)}), 422
+        # Check if structured batch error
+        val = e.args[0] if e.args else str(e)
+        if isinstance(val, dict) and val.get("type") == "batch_validation_error":
+            return jsonify({
+                "status": "error",
+                "message": val["message"],
+                "total_erroneous_rows": val["total_erroneous_rows"],
+                "row_errors": val["row_errors"],
+            }), 400
+        return jsonify({"status": "error", "message": str(val)}), 400
+
     except FileNotFoundError as e:
-        return jsonify({"status": "error", "message": str(e)}), 404
+        logger.warning(f"Batch predict requested before training: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "Models not trained. Run: python -m backend.services.train_models",
+        }), 503
     except Exception as e:
-        logger.error(f"Batch prediction error: {e}")
-        return jsonify({"status": "error", "message": f"Batch prediction failed: {str(e)}"}), 500
+        req_id = str(uuid.uuid4())
+        logger.exception(f"Batch prediction exception [req_id={req_id}]: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "An internal server error occurred during batch prediction.",
+            "request_id": req_id,
+        }), 500

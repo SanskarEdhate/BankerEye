@@ -1,6 +1,5 @@
 import plotly.graph_objects as go
-import plotly.express as px
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 def render_target_distribution_chart(target_dist: Dict[str, Any]) -> go.Figure:

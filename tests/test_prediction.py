@@ -34,7 +34,7 @@ def test_predict_single_ignores_duration(valid_customer_dict):
 def test_validate_customer_input_missing_field():
     """Verify validation fails when a required field is missing."""
     incomplete = {"age": 40, "job": "services"}
-    cleaned, errors = validate_customer_input(incomplete)
+    _cleaned, errors = validate_customer_input(incomplete)
     assert len(errors) > 0
     assert any("Missing required" in e for e in errors)
 
@@ -43,7 +43,7 @@ def test_validate_customer_input_invalid_category(valid_customer_dict):
     """Verify validation rejects arbitrary non-existent categorical values."""
     bad_cat = valid_customer_dict.copy()
     bad_cat["job"] = "astronaut_space_explorer"
-    cleaned, errors = validate_customer_input(bad_cat)
+    _cleaned, errors = validate_customer_input(bad_cat)
     assert any("Invalid value for 'job'" in e for e in errors)
 
 
@@ -51,7 +51,7 @@ def test_validate_customer_input_out_of_bounds(valid_customer_dict):
     """Verify validation rejects out of range numerical inputs."""
     bad_age = valid_customer_dict.copy()
     bad_age["age"] = 250  # Absurd age
-    cleaned, errors = validate_customer_input(bad_age)
+    _cleaned, errors = validate_customer_input(bad_age)
     assert any("out of reasonable range" in e for e in errors)
 
 

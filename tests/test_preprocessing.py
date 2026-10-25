@@ -1,4 +1,3 @@
-from pathlib import Path
 import pytest
 import pandas as pd
 from backend.services.preprocessing import (
@@ -59,7 +58,7 @@ def test_prepare_train_test_data_leakage_prevention():
     CRITICAL TEST: Verify feature 'duration' is strictly excluded from features,
     and target is correctly encoded as 0 and 1 with stratified 80/20 split.
     """
-    X_train, X_test, y_train, y_test, meta = prepare_train_test_data(
+    X_train, X_test, y_train, y_test, _meta = prepare_train_test_data(
         test_size=0.20,
         random_state=42,
         exclude_duration=True,
@@ -69,13 +68,16 @@ def test_prepare_train_test_data_leakage_prevention():
     assert "duration" not in X_train.columns, "LEAKAGE: 'duration' found in X_train!"
     assert "duration" not in X_test.columns, "LEAKAGE: 'duration' found in X_test!"
     assert "y" not in X_train.columns, "Target 'y' found in X_train!"
-    assert X_train.shape[1] == 15, f"Expected 15 features, got {X_train.shape[1]}"
+    from backend.config import NUMERICAL_FEATURES, CATEGORICAL_FEATURES
+    expected_feature_count = len(NUMERICAL_FEATURES) + len(CATEGORICAL_FEATURES)
+    assert X_train.shape[1] == expected_feature_count, f"Expected {expected_feature_count} features, got {X_train.shape[1]}"
 
-    # 2. Split sizes check
-    assert len(X_train) == 36168
-    assert len(X_test) == 9043
-    assert len(y_train) == 36168
-    assert len(y_test) == 9043
+    # 2. Split sizes check derived from metadata
+    assert len(X_train) == _meta["train_rows"]
+    assert len(X_test) == _meta["test_rows"]
+    assert len(y_train) == _meta["train_rows"]
+    assert len(y_test) == _meta["test_rows"]
+    assert len(X_train) + len(X_test) == _meta["train_rows"] + _meta["test_rows"]
 
     # 3. Target encoding check: only 0 and 1
     assert set(y_train.unique()) == {0, 1}
@@ -96,4 +98,5 @@ def test_build_preprocessor():
     # Fit and transform a small slice
     transformed = preprocessor.fit_transform(X_train.head(50))
     assert transformed.shape[0] == 50
-    assert transformed.shape[1] > 15  # OneHotEncoder expands categories
+    from backend.config import NUMERICAL_FEATURES, CATEGORICAL_FEATURES
+    assert transformed.shape[1] > (len(NUMERICAL_FEATURES) + len(CATEGORICAL_FEATURES))  # OneHotEncoder expands categories

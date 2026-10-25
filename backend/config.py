@@ -16,12 +16,10 @@ REPORTS_DIR = BASE_DIR / "reports"
 SAVED_MODELS_DIR.mkdir(parents=True, exist_ok=True)
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Default primary dataset candidate files
+# Default primary dataset candidate files (canonical benchmark datasets only)
 DATASET_CANDIDATES = [
     DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "03_Clean_Data" / "bank-full_clean.csv",
     DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "01_Raw_Data" / "bank-full.csv",
-    DATASET_DIR / "Data Cleaning & Splitting" / "3_train_test_competition" / "04_Train_Data" / "train.csv",
-    DATASET_DIR / "Data Cleaning & Splitting" / "2_bank_additional_socioeconomic" / "03_Clean_Data" / "bank-additional-full_clean.csv",
 ]
 
 
@@ -33,10 +31,19 @@ if ENV_DATASET_PATH:
         custom_path = BASE_DIR / custom_path
     DATASET_CANDIDATES.insert(0, custom_path)
 
-# Flask configuration
-FLASK_HOST = os.getenv("FLASK_HOST", "127.0.0.1")
-FLASK_PORT = int(os.getenv("FLASK_PORT", 5000))
-FLASK_DEBUG = os.getenv("FLASK_DEBUG", "True").lower() in ("true", "1", "yes")
+# Expected model pipeline filenames for health and cache integrity
+EXPECTED_MODEL_FILES = [
+    "logistic_regression_pipeline.joblib",
+    "decision_tree_pipeline.joblib",
+    "knn_pipeline.joblib",
+    "random_forest_pipeline.joblib",
+]
+
+# Flask configuration (FLASK_DEBUG defaults to False for security)
+# Cloud deployment platforms (Render, Railway, Heroku) inject PORT and require binding to 0.0.0.0
+FLASK_HOST = os.getenv("FLASK_HOST", "0.0.0.0" if (os.getenv("RENDER") or os.getenv("PORT")) else "127.0.0.1")
+FLASK_PORT = int(os.getenv("PORT", os.getenv("FLASK_PORT", 5000)))
+FLASK_DEBUG = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "yes")
 
 # Training & Splitting configuration
 DEFAULT_TEST_SIZE = 0.20

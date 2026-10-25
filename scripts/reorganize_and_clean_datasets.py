@@ -1,4 +1,3 @@
-import os
 import shutil
 import json
 from pathlib import Path

@@ -6,8 +6,10 @@ from typing import Dict, List, Optional, Tuple, Any
 
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from backend.config import (
@@ -16,11 +18,47 @@ from backend.config import (
     EXCLUDED_FEATURES_MAIN,
     NUMERICAL_FEATURES,
     CATEGORICAL_FEATURES,
+    ALL_INPUT_FEATURES,
     DEFAULT_TEST_SIZE,
     RANDOM_STATE,
 )
 
 logger = logging.getLogger(__name__)
+
+# Module-level dataset cache keyed by (file_path_str, mtime)
+_DATASET_CACHE: Dict[Tuple[str, float], Tuple[pd.DataFrame, Dict[str, Any]]] = {}
+
+
+class PdaysFeatureEngineer(BaseEstimator, TransformerMixin):
+    """
+    Feature engineering transformer that executes strictly within the scikit-learn pipeline:
+    - Creates a binary indicator flag 'never_contacted' (1.0 where pdays == -1, else 0.0)
+    - Sets 'pdays' to 0 for records where pdays == -1 to prevent negative distance distortion.
+    """
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        if isinstance(X, pd.DataFrame):
+            X_out = X.copy()
+            if "pdays" in X_out.columns:
+                pdays_numeric = pd.to_numeric(X_out["pdays"], errors="coerce").fillna(0)
+                X_out["never_contacted"] = (pdays_numeric == -1).astype(float)
+                X_out["pdays"] = np.where(pdays_numeric == -1, 0, pdays_numeric)
+            else:
+                X_out["never_contacted"] = 0.0
+            return X_out
+        elif isinstance(X, dict):
+            X_out = dict(X)
+            pdays_val = X_out.get("pdays", 0)
+            X_out["never_contacted"] = 1.0 if pdays_val == -1 else 0.0
+            if pdays_val == -1:
+                X_out["pdays"] = 0
+            return pd.DataFrame([X_out])
+        else:
+            X_df = pd.DataFrame(X)
+            return self.transform(X_df)
 
 
 def detect_csv_delimiter(file_path: Path) -> str:
@@ -72,17 +110,30 @@ def resolve_dataset_path(custom_path: Optional[str] = None) -> Path:
 def load_dataset(file_path: Optional[Path] = None) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Loads dataset, detects delimiter, inspects structure, and returns DataFrame
-    along with metadata.
+    along with metadata. Cached by (resolved_path, file_mtime).
     """
     resolved_path = resolve_dataset_path(str(file_path) if file_path else None)
-    delimiter = detect_csv_delimiter(resolved_path)
+    mtime = resolved_path.stat().st_mtime
+    cache_key = (str(resolved_path), mtime)
 
+    if cache_key in _DATASET_CACHE:
+        df_cached, meta_cached = _DATASET_CACHE[cache_key]
+        return df_cached.copy(), dict(meta_cached)
+
+    delimiter = detect_csv_delimiter(resolved_path)
     df = pd.read_csv(resolved_path, sep=delimiter)
 
     # Detect target column ('y' or 'subscribe')
     target_col = TARGET_COLUMN
     if target_col not in df.columns and "subscribe" in df.columns:
         target_col = "subscribe"
+
+    # Validate required features are present
+    missing_required = [col for col in ALL_INPUT_FEATURES if col not in df.columns]
+    if missing_required:
+        raise ValueError(
+            f"Dataset '{resolved_path.name}' is missing required feature columns: {missing_required}"
+        )
 
     # Basic metadata
     meta = {
@@ -99,11 +150,12 @@ def load_dataset(file_path: Optional[Path] = None) -> Tuple[pd.DataFrame, Dict[s
     if not meta["has_target"]:
         raise ValueError(f"Required target column ('{TARGET_COLUMN}' or 'subscribe') not found in dataset {resolved_path.name}")
 
+    _DATASET_CACHE[cache_key] = (df.copy(), dict(meta))
     return df, meta
 
 
 def get_available_datasets_list() -> List[Dict[str, Any]]:
-    """Returns a structured catalog of all organized datasets in dataset/ directory."""
+    """Returns a structured catalog of all organized datasets in dataset/ directory with row counts computed from files."""
     from backend.config import DATASET_DIR
     catalog = []
 
@@ -111,19 +163,16 @@ def get_available_datasets_list() -> List[Dict[str, Any]]:
         {
             "folder": "1_uci_bank_marketing_canonical",
             "name": "Canonical UCI Bank Marketing Dataset",
-            "description": "Original benchmark dataset by Moro et al. (2011/2014) containing 45,211 rows.",
             "primary_file": "bank-full.csv",
         },
         {
             "folder": "2_bank_additional_socioeconomic",
             "name": "Socioeconomic Extended Dataset (bank-additional)",
-            "description": "Enriched with 5 macroeconomic indicators from Banco de Portugal containing 41,188 rows.",
             "primary_file": "bank-additional-full.csv",
         },
         {
             "folder": "3_train_test_competition",
             "name": "Competition Train/Test Split Dataset",
-            "description": "Partitioned into 22,501 labeled training records and 7,501 unlabeled test records.",
             "primary_file": "train.csv",
         },
     ]
@@ -135,11 +184,39 @@ def get_available_datasets_list() -> List[Dict[str, Any]]:
 
         if dir_path.exists():
             files = [f.name for f in dir_path.rglob("*") if f.is_file() and not f.name.endswith(".json")]
+            
+            # Dynamically count rows from the files directly
+            train_rows = None
+            test_rows = None
+            total_rows = None
+
+            if item["folder"] == "3_train_test_competition":
+                train_file = next(dir_path.rglob("train.csv"), None)
+                test_file = next(dir_path.rglob("test.csv"), None)
+                if train_file and train_file.exists():
+                    with open(train_file, "r", encoding="utf-8", errors="ignore") as f:
+                        train_rows = max(0, sum(1 for _ in f) - 1)
+                if test_file and test_file.exists():
+                    with open(test_file, "r", encoding="utf-8", errors="ignore") as f:
+                        test_rows = max(0, sum(1 for _ in f) - 1)
+                
+                desc = f"Partitioned into {train_rows:,} labeled training records and {test_rows:,} unlabeled test records." if (train_rows and test_rows) else "Pre-partitioned competitive benchmark split."
+                total_rows = (train_rows or 0) + (test_rows or 0)
+            else:
+                primary_file_path = next(dir_path.rglob(item["primary_file"]), None)
+                if primary_file_path and primary_file_path.exists():
+                    with open(primary_file_path, "r", encoding="utf-8", errors="ignore") as f:
+                        total_rows = max(0, sum(1 for _ in f) - 1)
+                desc = f"{item['name']} containing {total_rows:,} records." if total_rows else item["name"]
+
             catalog.append({
                 "folder": item["folder"],
                 "name": item["name"],
-                "description": item["description"],
+                "description": desc,
                 "primary_file": item["primary_file"],
+                "total_rows": total_rows,
+                "train_rows": train_rows,
+                "test_rows": test_rows,
                 "files_count": len(files),
                 "files": files,
                 "exists": True,
@@ -301,23 +378,29 @@ def get_feature_categories(df: Optional[pd.DataFrame] = None) -> Dict[str, List[
     return categories
 
 
-def build_preprocessor(scale_numerical: bool = True) -> ColumnTransformer:
+def build_preprocessor(scale_numerical: bool = True) -> Pipeline:
     """
-    Builds a ColumnTransformer for preprocessing numerical and categorical features.
-    Numerical features: StandardScaler (if scale_numerical=True) or passthrough.
-    Categorical features: OneHotEncoder with handle_unknown='ignore'.
+    Builds a unified preprocessing Pipeline containing:
+    1. 'pdays_eng': PdaysFeatureEngineer creating 'never_contacted' flag and resetting pdays=-1 to 0.
+    2. 'col_transformer': ColumnTransformer with StandardScaler/passthrough and OneHotEncoder.
     """
     num_transformer = StandardScaler() if scale_numerical else "passthrough"
     cat_transformer = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
 
-    preprocessor = ColumnTransformer(
+    col_transformer = ColumnTransformer(
         transformers=[
-            ("num", num_transformer, NUMERICAL_FEATURES),
+            ("num", num_transformer, NUMERICAL_FEATURES + ["never_contacted"]),
             ("cat", cat_transformer, CATEGORICAL_FEATURES),
         ],
         remainder="drop",
     )
-    return preprocessor
+
+    return Pipeline(
+        steps=[
+            ("pdays_eng", PdaysFeatureEngineer()),
+            ("col_transformer", col_transformer),
+        ]
+    )
 
 
 def prepare_train_test_data(

@@ -1,0 +1,50 @@
+{
+  "dataset_id": "1_uci_bank_marketing_canonical",
+  "generated_at": "2026-10-25T22:30:00Z",
+  "raw_file": "01_Raw_Data/bank-full.csv",
+  "unclean_file": "02_Unclean_Data/bank-full.csv",
+  "cleaned_file": "03_Clean_Data/bank-full_clean.csv",
+  "cleaning_pipeline": [
+    {
+      "step": 1,
+      "operation": "strip_quotes",
+      "description": "Stripped surrounding double quotes from all column headers and string field values across all 45,211 records.",
+      "fields_affected": "all_headers_and_string_columns",
+      "status": "applied"
+    },
+    {
+      "step": 2,
+      "operation": "deduplication",
+      "description": "Scanned entire dataset for duplicate records. Exactly 0 duplicate rows were detected.",
+      "duplicate_rows_found": 0,
+      "rows_retained": 45211,
+      "status": "verified"
+    },
+    {
+      "step": 3,
+      "operation": "normalize_categories",
+      "description": "Standardized all categorical text features to trimmed lowercase representations (e.g., job, marital, education, default, housing, loan, contact, month, poutcome, y).",
+      "status": "applied"
+    },
+    {
+      "step": 4,
+      "operation": "document_unknown_handling",
+      "description": "Documented and audited 'unknown' values across features. In the UCI bank marketing benchmark, 'unknown' is an authentic observational category representing unrecorded outreach channels (contact: 13,020 rows / 28.8%) or absence of prior contact history (poutcome: 36,959 rows / 81.75%), as well as undisclosed client demographics (education: 1,857 rows / 4.11%, job: 288 rows / 0.64%). Instead of imputing synthetic values that distort genuine historical signals, 'unknown' is preserved as a distinct categorical state encoded via OneHotEncoder.",
+      "unknown_distribution": {
+        "job": 288,
+        "education": 1857,
+        "contact": 13020,
+        "poutcome": 36959
+      },
+      "policy": "Preserved as legitimate categorical level"
+    },
+    {
+      "step": 5,
+      "operation": "train_test_split_policy",
+      "description": "Stages 04_Train_Data/train.csv (36,168 rows) and 05_Test_Data/test.csv (9,043 rows) represent the canonical 80/20 stratified partition with random_state=42. The BankerEye training pipeline utilizes this exact partition by default. If custom test_size or random_state parameters are submitted via POST /api/models/train, the service dynamically re-splits from 03_Clean_Data/bank-full_clean.csv to honor the requested experimental setup.",
+      "canonical_train_rows": 36168,
+      "canonical_test_rows": 9043,
+      "random_seed": 42
+    }
+  ]
+}

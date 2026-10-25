@@ -9,10 +9,65 @@ if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
 from backend.app import create_app
+import tempfile
+from unittest.mock import patch
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_models_trained():
+    """
+    If saved models are missing, train tiny models on a small sample into a temp dir
+    (monkeypatch SAVED_MODELS_DIR) so a fresh clone passes pytest with no manual step.
+    """
+    import backend.config as cfg
+    from backend.config import EXPECTED_MODEL_FILES, SAVED_MODELS_DIR
+    import backend.services.train_models as tm
+    import backend.routes.report_routes as rr
+    import backend.app as ba
+
+    metrics_file = SAVED_MODELS_DIR / "model_metrics.json"
+    all_joblib_exist = all((SAVED_MODELS_DIR / fname).exists() for fname in EXPECTED_MODEL_FILES)
+
+    if all_joblib_exist and metrics_file.exists():
+        yield
+        return
+
+    # Create temporary directory for tiny models
+    temp_dir = tempfile.TemporaryDirectory()
+    tmp_path = Path(temp_dir.name)
+
+    orig_cfg = cfg.SAVED_MODELS_DIR
+    orig_tm = tm.SAVED_MODELS_DIR
+    orig_rr = rr.SAVED_MODELS_DIR
+    orig_ba = ba.SAVED_MODELS_DIR
+
+    cfg.SAVED_MODELS_DIR = tmp_path
+    tm.SAVED_MODELS_DIR = tmp_path
+    rr.SAVED_MODELS_DIR = tmp_path
+    ba.SAVED_MODELS_DIR = tmp_path
+
+    # Train tiny models on a small balanced sample
+    df, meta = tm.load_dataset()
+    df_sample = pd.concat(
+        [df[df["y"] == "no"].head(80), df[df["y"] == "yes"].head(20)]
+    ).sample(frac=1.0, random_state=42).reset_index(drop=True)
+    meta_sample = dict(meta)
+    meta_sample["total_rows"] = len(df_sample)
+
+    with patch.object(tm, "load_dataset", return_value=(df_sample, meta_sample)):
+        tm.train_and_evaluate_all_models(force_retrain=True)
+
+    yield
+
+    cfg.SAVED_MODELS_DIR = orig_cfg
+    tm.SAVED_MODELS_DIR = orig_tm
+    rr.SAVED_MODELS_DIR = orig_rr
+    ba.SAVED_MODELS_DIR = orig_ba
+    temp_dir.cleanup()
 
 
 @pytest.fixture(scope="session")
-def app():
+def app(ensure_models_trained):
     """Session-scoped Flask application instance."""
     app_instance = create_app()
     app_instance.config.update({"TESTING": True})

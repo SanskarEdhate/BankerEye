@@ -1,14 +1,11 @@
-import io
-import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import pandas as pd
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.lib.units import inch
 from reportlab.platypus import (
     HRFlowable,
     Paragraph,
@@ -18,7 +15,7 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-from backend.config import REPORTS_DIR, SAVED_MODELS_DIR
+from backend.config import REPORTS_DIR
 from backend.services.train_models import get_cached_metrics
 
 logger = logging.getLogger(__name__)
@@ -33,6 +30,16 @@ def get_structured_evaluation_report() -> Dict[str, Any]:
             "message": "No trained model metrics found. Please train models first via POST /api/models/train.",
         }
 
+    lit_json_path = REPORTS_DIR / "literature_data.json"
+    lit_papers = []
+    if lit_json_path.exists():
+        import json
+        try:
+            with open(lit_json_path, "r", encoding="utf-8") as f:
+                lit_papers = json.load(f)
+        except Exception:
+            pass
+
     return {
         "status": "success",
         "title": "Bank Marketing Subscription Prediction - Evaluation Report",
@@ -42,6 +49,7 @@ def get_structured_evaluation_report() -> Dict[str, Any]:
         "models": metrics.get("models"),
         "rankings": metrics.get("rankings"),
         "feature_importance": metrics.get("feature_importance"),
+        "literature_review": lit_papers,
         "anti_leakage_policy": (
             "Feature 'duration' is deliberately omitted from primary model pipelines to avoid target "
             "leakage. In realistic pre-campaign targeting, the duration of an outreach phone call is not known."
@@ -183,8 +191,8 @@ def generate_evaluation_pdf(output_path: Optional[Path] = None) -> Path:
     setup_data = [
         ["Parameter", "Configured Value", "Parameter", "Configured Value"],
         ["Benchmark Dataset", str(ds_info.get("file_name", "bank-full.csv")), "Total Records", f"{ds_info.get('total_rows', 45211):,}"],
-        ["Training Split (80%)", f"{split_info.get('train_rows', 36168):,}", "Test Split (20%)", f"{split_info.get('test_rows', 9043):,}"],
-        ["Target Variable", "y ('no' / 'yes')", "Positive Class (yes)", "11.70% (Imbalanced)"],
+        ["Training Split", f"{split_info.get('train_rows', 36168):,}", "Test Split", f"{split_info.get('test_rows', 9043):,}"],
+        ["Target Variable", "y ('no' / 'yes')", "Positive Class (yes)", f"{split_info.get('test_target_distribution', {}).get('yes_pct', 11.7):.2f}% (Imbalanced)"],
         ["Leakage Prevention", "Excluded 'duration'", "Validation Protocol", "Stratified Test Partition"],
     ]
     t_setup = Table(setup_data, colWidths=[120, 140, 120, 140])
@@ -249,48 +257,55 @@ def generate_evaluation_pdf(output_path: Optional[Path] = None) -> Path:
     best_roc = rankings.get("roc_auc", [{}])[0].get("display_name", "Random Forest")
     best_f1 = rankings.get("f1_score", [{}])[0].get("display_name", "Decision Tree")
 
+    test_instances = split_info.get("test_rows", len(metrics["models"]["random_forest"].get("confusion_matrix", {}).get("raw", [[0,0],[0,0]])))
+    test_target_dist = split_info.get("test_target_distribution", {})
+    yes_pct = test_target_dist.get("yes_pct", 11.7)
+    no_pct = round(100.0 - yes_pct, 1)
+
+    rf_roc = metrics["models"].get("random_forest", {}).get("metrics", {}).get("roc_auc", 0)
+    dt_f1 = metrics["models"].get("decision_tree", {}).get("metrics", {}).get("f1_score", 0)
+
     disc_text = (
-        f"Across the held-out evaluation subset of 9,043 instances, <b>{best_roc}</b> attained the highest overall "
-        f"discriminative power with an ROC-AUC of {metrics['models']['random_forest']['metrics']['roc_auc']:.2%}, "
+        f"Across the held-out evaluation subset of {test_instances:,} instances, <b>{best_roc}</b> attained the highest overall "
+        f"discriminative power with an ROC-AUC of {rf_roc:.2%}, "
         f"while <b>{best_f1}</b> delivered top balanced harmonic score with an F1 of "
-        f"{metrics['models']['decision_tree']['metrics']['f1_score']:.2%}. "
-        "Due to the pronounced 88.3% / 11.7% class imbalance, accuracy alone is misleading: "
-        "a naive dummy classifier predicting zero universally achieves 88.30% accuracy while failing completely on all subscribers. "
+        f"{dt_f1:.2%}. "
+        f"Due to the pronounced {no_pct:.1f}% / {yes_pct:.1f}% class imbalance, accuracy alone is misleading: "
+        f"a naive dummy classifier predicting zero universally achieves {no_pct:.2f}% accuracy while failing completely on all subscribers. "
         "The balanced class-weighting framework deployed across our ensemble and linear models elevates recall for the subscription class, "
         "ensuring valuable prospect discovery for telemarketing campaign managers."
     )
     story.append(Paragraph(disc_text, body_style))
 
-    # Verified Literature Review Summary
-    story.append(Paragraph("5. Verified Literature Review (2021-2024)", h1_style))
-    lit_data = [
-        ["Study & Authors", "Venue / DOI", "Key Findings & Alignment"],
-        [
-            "Alessa et al. (2023)\nICCMA",
-            "IEEE Xplore\n10.1109/ICCMA59762.2023.10374595",
-            "Evaluated LR, DT, KNN, and RF on Bank Marketing; ensemble learners demonstrated superior ROC-AUC.",
-        ],
-        [
-            "Singh et al. (2024)\nTIACOMP",
-            "IEEE Xplore\n10.1109/TIACOMP64125.2024.00085",
-            "Demonstrated the crucial importance of addressing class imbalance; resampling improved recall to >70%.",
-        ],
-        [
-            "Dixit & Kokila (2024)\nICONAT",
-            "IEEE Xplore\nDoc: 10700543",
-            "Benchmarked diverse classifiers and ensemble stacking, achieving ~90% accuracy with tuned feature inputs.",
-        ],
-        [
-            "Tanvir et al. (2024)\nDASA / arXiv",
-            "IEEE / arXiv\n10.48550/arXiv.2410.21539",
-            "Probabilistic Bayesian regression provides calibrated certainty intervals for marketing resource allocation.",
-        ],
-        [
-            "Khan et al. (2021)\nICCSA",
-            "Springer LNCS\n10.1007/978-3-030-87010-9_8",
-            "Highlighted customer balance and contact history importance; emphasized explainable AI for banking compliance.",
-        ],
-    ]
+    # Literature Review Summary loaded from shared JSON
+    story.append(Paragraph("5. Literature Review & Citation Audit", h1_style))
+    lit_json_path = REPORTS_DIR / "literature_data.json"
+    lit_data = [["Study & Authors", "Venue / DOI", "Verification Status & Alignment"]]
+    
+    if lit_json_path.exists():
+        import json
+        with open(lit_json_path, "r", encoding="utf-8") as f:
+            papers = json.load(f)
+        for p in papers:
+            authors = p.get("short_authors", p.get("authors", ""))
+            venue = p.get("short_venue", p.get("venue", ""))
+            doi = p.get("doi", "")
+            url = p.get("url", "")
+            status = p.get("verification_status", "Unverified, check before citing")
+            relevance = p.get("relevance", "")
+            link_html = f'{venue}<br/><a href="{url}"><font color="#2563eb"><u>{doi}</u></font></a>' if url else f'{venue}<br/>{doi}'
+            lit_data.append([
+                Paragraph(f"<b>{authors} ({p.get('year', '')})</b>", body_style),
+                Paragraph(link_html, body_style),
+                Paragraph(f"<b>[{status}]</b><br/>{relevance}", body_style),
+            ])
+    else:
+        lit_data.append([
+            Paragraph("<b>Tanvir et al. (2024)</b>", body_style),
+            Paragraph('arXiv / DASA<br/><a href="https://doi.org/10.48550/arXiv.2410.21539"><font color="#2563eb"><u>10.48550/arXiv.2410.21539</u></font></a>', body_style),
+            Paragraph("<b>[Verified]</b><br/>Calibrated certainty intervals.", body_style)
+        ])
+
     t_lit = Table(lit_data, colWidths=[120, 150, 250])
     t_lit.setStyle(
         TableStyle(

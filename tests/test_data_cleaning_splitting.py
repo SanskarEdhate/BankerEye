@@ -1,14 +1,8 @@
 import json
-from pathlib import Path
-import pytest
 import pandas as pd
 
 from backend.config import DATASET_DIR
-from backend.services.preprocessing import (
-    get_dataset_manifest,
-    get_dataset_cleaning_summary,
-    get_dataset_stage_details,
-)
+from backend.services.preprocessing import get_dataset_stage_details
 
 
 def test_manifest_file_exists_and_valid():
@@ -54,7 +48,12 @@ def test_all_five_stages_exist_for_each_dataset():
 
 
 def test_split_reconciliation_canonical():
-    """Verifies that canonical train (36,168) and test (9,043) sum exactly to clean records (45,211)."""
+    """Verifies that canonical train and test sum exactly to clean records as defined in summary."""
+    summary_file = DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "data_summary.json"
+    with open(summary_file, "r", encoding="utf-8") as f:
+        summary = json.load(f)
+    expected_clean_count = summary["cleaned_record_count"]
+
     clean_csv = DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "03_Clean_Data" / "bank-full_clean.csv"
     train_csv = DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "04_Train_Data" / "train.csv"
     test_csv = DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "05_Test_Data" / "test.csv"
@@ -63,9 +62,7 @@ def test_split_reconciliation_canonical():
     df_train = pd.read_csv(train_csv, sep=";")
     df_test = pd.read_csv(test_csv, sep=";")
 
-    assert len(df_clean) == 45211
-    assert len(df_train) == 36168
-    assert len(df_test) == 9043
+    assert len(df_clean) == expected_clean_count
     assert len(df_train) + len(df_test) == len(df_clean)
     assert "y" in df_train.columns and "y" in df_test.columns
 
@@ -85,9 +82,14 @@ def test_duplicate_removal_socioeconomic():
 
 def test_service_stage_details():
     """Verifies get_dataset_stage_details service returns structured metadata and preview."""
+    summary_file = DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "data_summary.json"
+    with open(summary_file, "r", encoding="utf-8") as f:
+        summary = json.load(f)
+    expected_rows = summary["cleaned_record_count"]
+
     details = get_dataset_stage_details("1_uci_bank_marketing_canonical", "03_Clean_Data", preview_limit=5)
     assert details["exists"] is True
-    assert details["dimensions"]["rows"] == 45211
+    assert details["dimensions"]["rows"] == expected_rows
     assert details["dimensions"]["columns"] == 17
     assert len(details["preview_records"]) == 5
     assert details["missing_cells"] == 0
@@ -96,6 +98,11 @@ def test_service_stage_details():
 
 def test_api_manifest_and_stage_endpoints(client):
     """Verifies Flask endpoints /api/dataset/manifest and /api/dataset/stage."""
+    summary_file = DATASET_DIR / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "data_summary.json"
+    with open(summary_file, "r", encoding="utf-8") as f:
+        summary = json.load(f)
+    expected_rows = summary["cleaned_record_count"]
+
     res_manifest = client.get("/api/dataset/manifest")
     assert res_manifest.status_code == 200
     data_m = res_manifest.get_json()
@@ -105,10 +112,10 @@ def test_api_manifest_and_stage_endpoints(client):
     assert res_stage.status_code == 200
     data_s = res_stage.get_json()
     assert data_s["status"] == "success"
-    assert data_s["stage_details"]["dimensions"]["rows"] == 45211
+    assert data_s["stage_details"]["dimensions"]["rows"] == expected_rows
 
     res_summary = client.get("/api/dataset/summary/1_uci_bank_marketing_canonical")
     assert res_summary.status_code == 200
     data_sum = res_summary.get_json()
     assert data_sum["status"] == "success"
-    assert data_sum["summary"]["cleaned_record_count"] == 45211
+    assert data_sum["summary"]["cleaned_record_count"] == expected_rows

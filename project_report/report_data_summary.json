@@ -1,0 +1,274 @@
+{
+  "project_name": "Bank Marketing Subscription Prediction System (BankerEye)",
+  "dataset": {
+    "source": "UCI Machine Learning Repository (Moro et al., 2014)",
+    "file_name": "bank-full.csv",
+    "total_records": 45211,
+    "training_records": 36168,
+    "testing_records": 9043,
+    "test_size_ratio": 0.2,
+    "random_state": 42,
+    "features_count": 15,
+    "feature_names": [
+      "age",
+      "job",
+      "marital",
+      "education",
+      "default",
+      "balance",
+      "housing",
+      "loan",
+      "contact",
+      "day",
+      "month",
+      "campaign",
+      "pdays",
+      "previous",
+      "poutcome"
+    ],
+    "engineered_features": [
+      "never_contacted"
+    ],
+    "excluded_features": [
+      "duration"
+    ],
+    "anti_leakage_note": "Call duration is strictly excluded because it is only known after marketing contact, preventing data leakage and unrealistic performance claims.",
+    "class_distribution": {
+      "total_no": 39922,
+      "total_yes": 5289,
+      "total_yes_pct": 11.7,
+      "train_distribution": {
+        "0 (no)": 31937,
+        "1 (yes)": 4231,
+        "yes_pct": 11.7
+      },
+      "test_distribution": {
+        "0 (no)": 7985,
+        "1 (yes)": 1058,
+        "yes_pct": 11.7
+      }
+    }
+  },
+  "models_evaluated": {
+    "logistic_regression": {
+      "name": "Logistic Regression",
+      "metrics": {
+        "accuracy": 0.8784,
+        "precision": 0.4776,
+        "recall": 0.4234,
+        "f1_score": 0.4489,
+        "roc_auc": 0.772,
+        "brier_score": 0.085
+      },
+      "optimal_threshold": 0.25,
+      "bootstrap_ci_95": {
+        "f1_ci_95": [0.4217, 0.4732],
+        "roc_auc_ci_95": [0.7578, 0.7889]
+      },
+      "hyperparameters": {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "solver": "lbfgs",
+        "max_iter": 1000
+      },
+      "confusion_matrix": {
+        "raw": [
+          [7495, 490],
+          [610, 448]
+        ],
+        "true_negatives": 7495,
+        "false_positives": 490,
+        "false_negatives": 610,
+        "true_positives": 448
+      },
+      "timing": {
+        "training_time_sec": 5.486,
+        "prediction_time_sec": 0.034
+      }
+    },
+    "decision_tree": {
+      "name": "Decision Tree Classifier",
+      "metrics": {
+        "accuracy": 0.88,
+        "precision": 0.4866,
+        "recall": 0.4641,
+        "f1_score": 0.4751,
+        "roc_auc": 0.7776,
+        "brier_score": 0.0834
+      },
+      "optimal_threshold": 0.27,
+      "bootstrap_ci_95": {
+        "f1_ci_95": [0.4468, 0.5011],
+        "roc_auc_ci_95": [0.7611, 0.7947]
+      },
+      "hyperparameters": {
+        "max_depth": 10,
+        "min_samples_split": 20,
+        "class_weight": "balanced"
+      },
+      "confusion_matrix": {
+        "raw": [
+          [7467, 518],
+          [567, 491]
+        ],
+        "true_negatives": 7467,
+        "false_positives": 518,
+        "false_negatives": 567,
+        "true_positives": 491
+      },
+      "timing": {
+        "training_time_sec": 6.724,
+        "prediction_time_sec": 0.0516
+      }
+    },
+    "knn": {
+      "name": "K-Nearest Neighbours (KNN)",
+      "metrics": {
+        "accuracy": 0.8642,
+        "precision": 0.4113,
+        "recall": 0.3724,
+        "f1_score": 0.3909,
+        "roc_auc": 0.7233,
+        "brier_score": 0.0897
+      },
+      "optimal_threshold": 0.21,
+      "bootstrap_ci_95": {
+        "f1_ci_95": [0.3649, 0.4179],
+        "roc_auc_ci_95": [0.7056, 0.7416]
+      },
+      "hyperparameters": {
+        "n_neighbors": 5,
+        "class_weight": "none (KNN has no class_weight parameter)"
+      },
+      "confusion_matrix": {
+        "raw": [
+          [7421, 564],
+          [664, 394]
+        ],
+        "true_negatives": 7421,
+        "false_positives": 564,
+        "false_negatives": 664,
+        "true_positives": 394
+      },
+      "timing": {
+        "training_time_sec": 10.785,
+        "prediction_time_sec": 1.1526
+      }
+    },
+    "random_forest": {
+      "name": "Random Forest Classifier",
+      "metrics": {
+        "accuracy": 0.8697,
+        "precision": 0.4491,
+        "recall": 0.5,
+        "f1_score": 0.4732,
+        "roc_auc": 0.7986,
+        "brier_score": 0.0822
+      },
+      "optimal_threshold": 0.25,
+      "bootstrap_ci_95": {
+        "f1_ci_95": [0.4464, 0.4965],
+        "roc_auc_ci_95": [0.7841, 0.8138]
+      },
+      "hyperparameters": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "class_weight": "balanced"
+      },
+      "confusion_matrix": {
+        "raw": [
+          [7336, 649],
+          [529, 529]
+        ],
+        "true_negatives": 7336,
+        "false_positives": 649,
+        "false_negatives": 529,
+        "true_positives": 529
+      },
+      "timing": {
+        "training_time_sec": 135.863,
+        "prediction_time_sec": 2.3028
+      }
+    }
+  },
+  "statistical_verdict": "The 95% confidence intervals for Decision Tree Classifier [0.4468, 0.5011] and Random Forest Classifier [0.4464, 0.4965] overlap. Their performances are not statistically distinguishable on this test set.",
+  "is_top_model_distinguishable": false,
+  "best_overall_model": {
+    "model_key": "random_forest",
+    "model_name": "Random Forest Classifier",
+    "roc_auc": 0.7986,
+    "brier_score": 0.0822,
+    "recall": 0.5,
+    "f1_score": 0.4732,
+    "precision": 0.4491,
+    "accuracy": 0.8697,
+    "selection_rationale": "Designated as production standard due to highest discriminative capacity (ROC-AUC 0.7986), highest sensitivity (Recall 50.0%), and lowest Brier score (0.0822), while its F1-score (0.4732) is statistically indistinguishable from Decision Tree (0.4751) under 95% bootstrap confidence intervals."
+  },
+  "literature_review": [
+    {
+      "id": 1,
+      "title": "Banking in Terms of Deposit Prediction Based on Machine Learning and Big Data Analytics",
+      "authors": "Nourah Alessa, Amal Majdua, Sharifah Alshehri, Maryam Alhawiti, Resan Aljohani, A'aeshah Alhakamy",
+      "short_authors": "Alessa et al.",
+      "year": 2023,
+      "venue": "IEEE 11th International Conference on Control, Mechatronics and Automation (ICCMA)",
+      "doi": "10.1109/ICCMA59762.2023.10374595",
+      "url": "https://doi.org/10.1109/ICCMA59762.2023.10374595",
+      "verification_status": "Unverified, check before citing",
+      "models": "Logistic Regression, Decision Tree, KNN, Random Forest, SVM + PySpark",
+      "findings": "Ensemble bagging models (Random Forest) consistently surpassed individual linear classifiers in complex demographic interactions, especially when integrated with big data processing."
+    },
+    {
+      "id": 2,
+      "title": "Enhancing Marketing Strategies: Analyzing Customer Behavior in Banking through Data Analysis and Machine Learning",
+      "authors": "Davinder Paul Singh, Mani Manjari, Dipti Jain, S. B. Uppal, R. Kumar, P. Goel",
+      "short_authors": "Singh et al.",
+      "year": 2024,
+      "venue": "IEEE Trends in Information and Advanced Computing (TIACOMP)",
+      "doi": "10.1109/TIACOMP64125.2024.00085",
+      "url": "https://doi.org/10.1109/TIACOMP64125.2024.00085",
+      "verification_status": "Unverified, check before citing",
+      "models": "Random Forest, Decision Tree, Logistic Regression with SMOTE",
+      "findings": "Addressing severe class imbalance significantly boosted subscription recall from ~30% to over 70%, preventing minority class starvation."
+    },
+    {
+      "id": 3,
+      "title": "Innovative Approaches of Machine Learning to Enhance Predictive Analytics Based on Banking Institution Strategies",
+      "authors": "Anuj Kumar Dixit, R. Kokila",
+      "short_authors": "Dixit & Kokila",
+      "year": 2024,
+      "venue": "IEEE 3rd International Conference for Advancement in Technology (ICONAT)",
+      "doi": "IEEE Document ID: 10700543",
+      "url": "https://ieeexplore.ieee.org/document/10700543",
+      "verification_status": "Unverified, check before citing",
+      "models": "KNN, Logistic Regression, Gaussian NB, Decision Tree, Random Forest, XGBoost, Stacking",
+      "findings": "Achieved peak prediction accuracy through rigorous preprocessing, feature scaling, and ensemble stacking over standalone classifiers."
+    },
+    {
+      "id": 4,
+      "title": "Bayesian Regression for Predicting Subscription to Bank Term Deposits in Direct Marketing Campaigns",
+      "authors": "Muhammad Farhan Tanvir, Md Maruf Hossain, Md Asifuzzaman Jishan",
+      "short_authors": "Tanvir et al.",
+      "year": 2024,
+      "venue": "IEEE DASA / arXiv",
+      "doi": "10.48550/arXiv.2410.21539",
+      "url": "https://doi.org/10.48550/arXiv.2410.21539",
+      "verification_status": "Verified",
+      "models": "Bayesian Logistic Regression, Probit Regression, Logit",
+      "findings": "Probabilistic models generate calibrated uncertainty intervals that prevent overconfident misallocation of calls."
+    },
+    {
+      "id": 5,
+      "title": "A Study on Improving Banking Process for Predicting Prospective Customers of Term Deposits Using Explainable Machine Learning Models",
+      "authors": "M. Z. Khan, S. Munquad, T. S. M. Rao",
+      "short_authors": "Khan et al.",
+      "year": 2021,
+      "venue": "Springer LNCS (vol. 12956), ICCSA",
+      "doi": "10.1007/978-3-030-87010-9_8",
+      "url": "https://doi.org/10.1007/978-3-030-87010-9_8",
+      "verification_status": "Unverified, check before citing",
+      "models": "Random Forest, Decision Tree, Logistic Regression, Explainable AI (SHAP)",
+      "findings": "Financial health attributes (balance) and contact history dominate conversion; interpretability is vital for banking."
+    }
+  ]
+}

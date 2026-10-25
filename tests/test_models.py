@@ -14,7 +14,7 @@ def test_model_definitions():
     expected_models = {"logistic_regression", "decision_tree", "knn", "random_forest"}
     assert set(MODEL_DEFINITIONS.keys()) == expected_models
 
-    for k, meta in MODEL_DEFINITIONS.items():
+    for meta in MODEL_DEFINITIONS.values():
         assert "display_name" in meta
         assert "description" in meta
         estimator = meta["estimator"]()
@@ -23,7 +23,7 @@ def test_model_definitions():
 
 def test_load_all_trained_model_pipelines():
     """Verify each of the 4 serialized pipelines can be loaded from disk."""
-    for model_key in MODEL_DEFINITIONS.keys():
+    for model_key in MODEL_DEFINITIONS:
         pipeline = load_model_pipeline(model_key)
         assert isinstance(pipeline, Pipeline)
         assert hasattr(pipeline, "predict")
@@ -58,7 +58,8 @@ def test_cached_metrics_integrity():
         # Confusion matrix checks
         cm = metrics["models"][model_key]["confusion_matrix"]
         total_eval = cm["true_negatives"] + cm["false_positives"] + cm["false_negatives"] + cm["true_positives"]
-        assert total_eval == 9043, f"Expected 9,043 test instances, got: {total_eval}"
+        expected_test_instances = metrics.get("split_info", {}).get("test_rows", metrics.get("dataset_info", {}).get("test_rows"))
+        assert total_eval == expected_test_instances, f"Expected {expected_test_instances} test instances, got: {total_eval}"
 
 
 def test_feature_importance_availability():

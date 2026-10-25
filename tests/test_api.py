@@ -1,6 +1,3 @@
-import json
-import pytest
-
 
 def test_api_health_endpoint(client):
     """Verify /api/health returns 200 and healthy status."""

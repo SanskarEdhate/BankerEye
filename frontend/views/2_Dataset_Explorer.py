@@ -9,11 +9,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-import importlib
-if "frontend.utils.api_client" in sys.modules:
-    import frontend.utils.api_client
-    importlib.reload(frontend.utils.api_client)
-
 from frontend.utils.api_client import (
     check_api_health,
     get_dataset_summary,
@@ -24,12 +19,7 @@ from frontend.utils.api_client import (
     get_dataset_stage_details,
 )
 
-from frontend.components.cards import render_kpi_card, render_info_banner
-
-try:
-    st.set_page_config(page_title="Dataset Explorer | BankerEye ML", page_icon="🔍", layout="wide")
-except Exception:
-    pass
+from frontend.components.cards import render_kpi_card
 
 st.markdown(
     """
@@ -203,13 +193,13 @@ with tab_inspector:
         preview_records = stage_data.get("preview_records", [])
         if preview_records:
             df_st_preview = pd.DataFrame(preview_records)
-            st.dataframe(df_st_preview, use_container_width=True, height=280)
+            st.dataframe(df_st_preview, width="stretch", height=280)
             st.caption(f"Showing first {len(df_st_preview)} rows of {stage_data.get('file_name')}. Relative storage path: `dataset/Data Cleaning & Splitting/{selected_ds_id}/{stage_choice}/{stage_data.get('file_name')}`")
         
         with st.expander("🔍 Inspect Schema & Column Data Types for this Stage"):
             dtypes_dict = stage_data.get("dtypes", {})
             df_dtypes = pd.DataFrame([{"Column": c, "Data Type": t} for c, t in dtypes_dict.items()])
-            st.dataframe(df_dtypes, use_container_width=True, hide_index=True)
+            st.dataframe(df_dtypes, width="stretch", hide_index=True)
     else:
         st.warning(f"Stage '{stage_choice}' has not been generated or is not applicable for this dataset.")
 
@@ -284,7 +274,7 @@ with tab_preview:
         else:
             df_filtered = df_sample
 
-        st.dataframe(df_filtered, use_container_width=True, height=350)
+        st.dataframe(df_filtered, width="stretch", height=350)
         st.caption(f"Showing {len(df_filtered)} preview records.")
     else:
         st.warning("Could not fetch preview records.")
@@ -313,7 +303,7 @@ with tab_schema:
         {"Feature": "y", "Type": "Target Binary (object)", "Description": "Has client subscribed a term deposit? ('no' = 0, 'yes' = 1)"},
     ]
     df_schema = pd.DataFrame(schema_data)
-    st.dataframe(df_schema, use_container_width=True, hide_index=True)
+    st.dataframe(df_schema, width="stretch", hide_index=True)
 
 # ----------------- TAB 3: DESCRIPTIVE STATS -----------------
 with tab_stats:
@@ -322,7 +312,7 @@ with tab_stats:
     if num_summary:
         df_num = pd.DataFrame(num_summary).T.reset_index()
         df_num.rename(columns={"index": "Attribute"}, inplace=True)
-        st.dataframe(df_num, use_container_width=True, hide_index=True)
+        st.dataframe(df_num, width="stretch", hide_index=True)
 
     st.markdown("#### Categorical Attributes & 'Unknown' Value Analysis")
     st.caption("In bank marketing surveys, 'unknown' values are not random missing data, but meaningful informational categories (e.g. poutcome 'unknown' indicates a first-time prospect).")
@@ -337,7 +327,7 @@ with tab_stats:
                 "'Unknown' Share (%)": f"{details.get('unknown_percentage'):.2f}%",
                 "Top Values": ", ".join([f"{k} ({v:,})" for k, v in list(details.get("top_values", {}).items())[:3]])
             })
-        st.dataframe(pd.DataFrame(cat_rows), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(cat_rows), width="stretch", hide_index=True)
 
 # ----------------- TAB 4: DISTRIBUTIONS & EDA -----------------
 with tab_distributions:
@@ -373,7 +363,7 @@ with tab_distributions:
                 xaxis=dict(title=dict(text="Number of Campaign Contacts", font=dict(size=11.5, family="Inter", color="#334155")), gridcolor="#f1f5f9", range=[0, 11500]),
                 yaxis=dict(title=None, tickfont=dict(size=11, family="Inter", color="#0f172a")),
             )
-            st.plotly_chart(fig_jobs, use_container_width=True)
+            st.plotly_chart(fig_jobs, width="stretch")
 
     with eda_r1_c2:
         st.markdown("##### 📞 Previous Campaign Outreach Outcome (poutcome)")
@@ -401,7 +391,7 @@ with tab_distributions:
                 paper_bgcolor="rgba(0,0,0,0)",
                 legend=dict(orientation="h", yanchor="bottom", y=-0.18, xanchor="center", x=0.5, font=dict(size=10.5, family="Inter", color="#334155")),
             )
-            st.plotly_chart(fig_pout, use_container_width=True)
+            st.plotly_chart(fig_pout, width="stretch")
 
     st.markdown("<br>", unsafe_allow_html=True)
     eda_r2_c1, eda_r2_c2 = st.columns(2)
@@ -432,7 +422,7 @@ with tab_distributions:
                 yaxis=dict(title=dict(text="Contacts Count", font=dict(size=11.5, family="Inter", color="#334155")), gridcolor="#f1f5f9", range=[0, 26000]),
                 xaxis=dict(title=None, tickfont=dict(size=11.5, family="Inter", color="#0f172a")),
             )
-            st.plotly_chart(fig_edu, use_container_width=True)
+            st.plotly_chart(fig_edu, width="stretch")
 
     with eda_r2_c2:
         st.markdown("##### 💍 Marital Status Distribution")
@@ -460,7 +450,7 @@ with tab_distributions:
                 paper_bgcolor="rgba(0,0,0,0)",
                 legend=dict(orientation="h", yanchor="bottom", y=-0.18, xanchor="center", x=0.5, font=dict(size=10.5, family="Inter", color="#334155")),
             )
-            st.plotly_chart(fig_mar, use_container_width=True)
+            st.plotly_chart(fig_mar, width="stretch")
 
 # ----------------- TAB 5: DATA EXPORT -----------------
 with tab_download:

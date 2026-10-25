@@ -1,5 +1,5 @@
 {
-  "title": "BankerEye ML \u2014 Dataset Manifest & Catalog",
+  "title": "BankerEye ML — Dataset Manifest & Catalog",
   "root_directory": "dataset/Data Cleaning & Splitting",
   "generated_at": "2026-10-25T18:49:08.042128",
   "total_datasets_discovered": 3,
@@ -8,60 +8,57 @@
     {
       "dataset_id": "1_uci_bank_marketing_canonical",
       "dataset_name": "Canonical UCI Bank Marketing Dataset",
-      "original_path": "dataset\\1_uci_bank_marketing_canonical\\bank-full.csv",
       "file_format": "CSV (Semicolon Delimited)",
-      "output_directory": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical",
+      "output_directory": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical",
       "rows": 45211,
       "columns": 17,
       "task_type": "Binary Classification",
       "target_column": "y",
       "preparation_status": "Completed (All 5 Stages Verified)",
       "stages": {
-        "01_Raw_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\01_Raw_Data\\bank-full.csv",
-        "02_Unclean_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\02_Unclean_Data\\bank-full.csv",
-        "03_Clean_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\03_Clean_Data\\bank-full_clean.csv",
-        "04_Train_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\04_Train_Data\\train.csv",
-        "05_Test_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\05_Test_Data\\test.csv"
+        "01_Raw_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/01_Raw_Data/bank-full.csv",
+        "02_Unclean_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/02_Unclean_Data/bank-full.csv",
+        "03_Clean_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/03_Clean_Data/bank-full_clean.csv",
+        "04_Train_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/04_Train_Data/train.csv",
+        "05_Test_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/05_Test_Data/test.csv"
       },
       "notes": "45,211 rows. Benchmark dataset used for BankerEye primary model training."
     },
     {
       "dataset_id": "2_bank_additional_socioeconomic",
       "dataset_name": "Socioeconomic Extended Dataset (bank-additional)",
-      "original_path": "dataset\\2_bank_additional_socioeconomic\\bank-additional-full.csv",
       "file_format": "CSV (Semicolon Delimited)",
-      "output_directory": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic",
+      "output_directory": "dataset/Data Cleaning & Splitting/2_bank_additional_socioeconomic",
       "rows": 41188,
       "columns": 21,
       "task_type": "Binary Classification",
       "target_column": "y",
       "preparation_status": "Completed (All 5 Stages Verified)",
       "stages": {
-        "01_Raw_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\01_Raw_Data\\bank-additional-full.csv",
-        "02_Unclean_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\02_Unclean_Data\\bank-additional-full.csv",
-        "03_Clean_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\03_Clean_Data\\bank-additional-full_clean.csv",
-        "04_Train_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\04_Train_Data\\train.csv",
-        "05_Test_Data": "dataset\\Data Cleaning & Splitting\\2_bank_additional_socioeconomic\\05_Test_Data\\test.csv"
+        "01_Raw_Data": "dataset/Data Cleaning & Splitting/2_bank_additional_socioeconomic/01_Raw_Data/bank-additional-full.csv",
+        "02_Unclean_Data": "dataset/Data Cleaning & Splitting/2_bank_additional_socioeconomic/02_Unclean_Data/bank-additional-full.csv",
+        "03_Clean_Data": "dataset/Data Cleaning & Splitting/2_bank_additional_socioeconomic/03_Clean_Data/bank-additional-full_clean.csv",
+        "04_Train_Data": "dataset/Data Cleaning & Splitting/2_bank_additional_socioeconomic/04_Train_Data/train.csv",
+        "05_Test_Data": "dataset/Data Cleaning & Splitting/2_bank_additional_socioeconomic/05_Test_Data/test.csv"
       },
       "notes": "Cleaned 12 duplicates (41,188 -> 41,176 rows). Features 5 macroeconomic indicators."
     },
     {
       "dataset_id": "3_train_test_competition",
       "dataset_name": "Competition Train/Test Split Dataset",
-      "original_path": "dataset\\3_train_test_competition\\train.csv",
       "file_format": "CSV (Comma Delimited)",
-      "output_directory": "dataset\\Data Cleaning & Splitting\\3_train_test_competition",
+      "output_directory": "dataset/Data Cleaning & Splitting/3_train_test_competition",
       "rows": 30000,
       "columns": 22,
       "task_type": "Binary Classification (Competition Pre-Split)",
       "target_column": "subscribe",
       "preparation_status": "Completed (All 5 Stages Verified)",
       "stages": {
-        "01_Raw_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\01_Raw_Data\\train.csv",
-        "02_Unclean_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\02_Unclean_Data\\train.csv",
-        "03_Clean_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\03_Clean_Data\\train_clean.csv",
-        "04_Train_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\04_Train_Data\\train.csv",
-        "05_Test_Data": "dataset\\Data Cleaning & Splitting\\3_train_test_competition\\05_Test_Data\\test.csv"
+        "01_Raw_Data": "dataset/Data Cleaning & Splitting/3_train_test_competition/01_Raw_Data/train.csv",
+        "02_Unclean_Data": "dataset/Data Cleaning & Splitting/3_train_test_competition/02_Unclean_Data/train.csv",
+        "03_Clean_Data": "dataset/Data Cleaning & Splitting/3_train_test_competition/03_Clean_Data/train_clean.csv",
+        "04_Train_Data": "dataset/Data Cleaning & Splitting/3_train_test_competition/04_Train_Data/train.csv",
+        "05_Test_Data": "dataset/Data Cleaning & Splitting/3_train_test_competition/05_Test_Data/test.csv"
       },
       "notes": "22,500 train rows + 7,500 unlabeled test rows with sample_submission.csv."
     }

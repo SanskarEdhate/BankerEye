@@ -17,7 +17,7 @@ Direct telemarketing campaigns conducted by commercial banking institutions to p
 
 The system leverages the benchmark UCI Bank Marketing dataset comprising 45,211 observational campaign records. To adhere strictly to real-world deployment constraints and prevent target leakage, the feature `duration` (call duration in seconds) is intentionally excluded from the primary model pipeline. Four core supervised machine learning algorithms are trained and evaluated under an identical, stratified 80/20 train/test partition: **Logistic Regression**, **Decision Tree Classifier**, **K-Nearest Neighbours (KNN)**, and **Random Forest Classifier**.
 
-On the held-out test partition of 9,043 instances, the **Random Forest Classifier** achieved the highest overall discriminative performance with an ROC-AUC of **79.46%** (Accuracy: 81.43%, F1-Score: 42.08%), while the **Decision Tree Classifier** attained the top balanced harmonic F1-Score of **42.18%** (Recall: 62.48%). The system features a modular Python architecture consisting of a **Flask REST API** backend and a high-performance **Streamlit** analytical dashboard supporting interactive single-customer propensity scoring, bulk CSV batch predictions, dynamic Plotly visualizations, and automated academic PDF report generation.
+Each model is regularized, hyperparameter-tuned via 5-fold cross-validated grid search on the training split, and calibrated via 3-fold cross-validated isotonic regression. On the held-out test partition of 9,043 instances, the **Random Forest Classifier** achieved the highest overall discriminative performance with an ROC-AUC of **79.86%** (Accuracy: 86.97%, F1-Score: 47.32%), while the **Decision Tree Classifier** attained an F1-Score of **47.51%** (Accuracy: 88.00%, Recall: 46.41%). Non-parametric percentile bootstrap evaluation (n=500) demonstrates that the 95% confidence intervals for Decision Tree F1 [0.4468, 0.5011] and Random Forest F1 [0.4464, 0.4965] overlap, establishing that their predictive performances are not statistically distinguishable on this test set. The system features a modular Python architecture consisting of a **Flask REST API** backend and a high-performance **Streamlit** analytical dashboard supporting interactive single-customer propensity scoring, bulk CSV batch predictions, dynamic Plotly visualizations, and automated academic PDF report generation.
 
 ---
 
@@ -39,32 +39,33 @@ The UCI Bank Marketing dataset contains the attribute `duration` (the elapsed du
 ---
 
 ## 5. Objectives
-1. **Pipeline Engineering:** Build a robust, reproducible data preprocessing pipeline with automatic delimiter detection, missing-value validation, and stratified train/test partitioning.
+1. **Pipeline Engineering:** Build a robust, reproducible data preprocessing pipeline with automatic delimiter detection, missing-value validation, engineered `never_contacted` indicators, and stratified train/test partitioning.
 2. **Leakage Prevention:** Rigorously eliminate call duration from feature matrices.
 3. **Multi-Model Benchmark:** Train, tune, and compare four diverse supervised classification algorithms on an identical held-out test set.
-4. **Comprehensive Evaluation:** Calculate Accuracy, Precision, Recall, F1-Score, ROC-AUC, and Confusion Matrices using the positive subscription class (`yes` = 1).
-5. **Full-Stack Deployment:** Develop a decoupled Flask REST API backend paired with an interactive Streamlit analytics frontend.
-6. **Dual Inference:** Support both interactive single-customer profiling and high-throughput CSV batch predictions.
-7. **Automated Reporting:** Deliver downloadable evaluation summaries (JSON), metrics comparisons (CSV), and formal academic PDF reports.
+4. **Isotonic Calibration:** Wrap models in 3-fold cross-validated isotonic regression to deliver calibrated posterior probabilities and minimize Brier score.
+5. **Statistical Significance Testing:** Generate 500-sample bootstrap 95% confidence intervals for F1 and ROC-AUC to prevent overconfident claims of superiority.
+6. **Full-Stack Deployment:** Develop a decoupled Flask REST API backend paired with an interactive Streamlit analytics frontend.
+7. **Dual Inference:** Support both interactive single-customer profiling and high-throughput CSV batch predictions.
+8. **Automated Reporting:** Deliver downloadable evaluation summaries (JSON), metrics comparisons (CSV), and formal academic PDF reports.
 
 ---
 
 ## 6. Scope of the Project
-- **In Scope:** Supervised tabular classification using Scikit-Learn; feature encoding via `ColumnTransformer`; class imbalance handling via balanced weighting; REST API endpoints for training, evaluation, single and batch prediction; interactive Streamlit web dashboard.
+- **In Scope:** Supervised tabular classification using Scikit-Learn; feature encoding via `ColumnTransformer`; class imbalance handling via balanced weighting; probability calibration via `CalibratedClassifierCV`; threshold optimization; REST API endpoints for training, evaluation, single and batch prediction; interactive Streamlit web dashboard.
 - **Out of Scope:** Voice recording analysis, real-time telephony streaming, automated autodialers, and unconstrained LLM text generation.
 
 ---
 
-## 7. Literature Review — Minimum Five Verified Research Papers
-The table below summarizes five peer-reviewed papers (2021–2024) investigating machine learning on the UCI Bank Marketing dataset:
+## 7. Literature Review — Minimum Five Research Papers
+The table below summarizes research papers (2021–2024) investigating machine learning on the UCI Bank Marketing dataset, audited for citation verification:
 
-| # | Paper Title | Authors & Year | Venue & DOI | Core Algorithms | Reported Findings & Relevance |
-|---|---|---|---|---|---|
-| 1 | Banking in Terms of Deposit Prediction Based on Machine Learning and Big Data Analytics | N. Alessa et al. (2023) | IEEE ICCMA<br>DOI: 10.1109/ICCMA59762.2023.10374595 | LR, DT, KNN, RF, SVM + PySpark | Random Forest ensemble outperformed individual linear models across customer sub-cohorts. Directly validates our 4-model selection. |
-| 2 | Enhancing Marketing Strategies: Analyzing Customer Behavior in Banking through Data Analysis and Machine Learning | D. P. Singh et al. (2024) | IEEE TIACOMP<br>DOI: 10.1109/TIACOMP64125.2024.00085 | RF, DT, LR + SMOTE | Mitigating class imbalance improved subscription recall from ~30% to >70%, avoiding majority class dominance. Confirms our class-weighting design. |
-| 3 | Innovative Approaches of Machine Learning to Enhance Predictive Analytics Based on Banking Institution Strategies | A. K. Dixit & R. Kokila (2024) | IEEE ICONAT<br>IEEE Doc: 10700543 | KNN, LR, NB, DT, RF, XGBoost | Normalization and ensemble stacking reached ~90.36% accuracy. Confirms the necessity of `StandardScaler` for KNN/LR. |
-| 4 | Bayesian Regression for Predicting Subscription to Bank Term Deposits in Direct Marketing Campaigns | M. F. Tanvir et al. (2024) | IEEE DASA / arXiv<br>DOI: 10.48550/arXiv.2410.21539 | Bayesian Logit, Probit, Logit | Calibrated probabilistic outputs prevent binary cutoff errors, justifying continuous probability scores and risk gauge charts. |
-| 5 | A Study on Improving Banking Process for Predicting Prospective Customers of Term Deposits Using Explainable Machine Learning Models | M. Z. Khan et al. (2021) | Springer LNCS (vol. 12956)<br>DOI: 10.1007/978-3-030-87010-9_8 | RF, DT, LR, SHAP | Balance and previous campaign history are primary predictors; explainable attribution is mandatory for banking compliance. |
+| # | Paper Title | Authors & Year | Venue & DOI | Verification Status | Core Algorithms | Reported Findings & Relevance |
+|---|---|---|---|---|---|---|
+| 1 | Banking in Terms of Deposit Prediction Based on Machine Learning and Big Data Analytics | N. Alessa et al. (2023) | IEEE ICCMA<br>DOI: 10.1109/ICCMA59762.2023.10374595 | Unverified, check before citing | LR, DT, KNN, RF, SVM + PySpark | Random Forest ensemble outperformed individual linear models across customer sub-cohorts. Directly validates our 4-model selection. |
+| 2 | Enhancing Marketing Strategies: Analyzing Customer Behavior in Banking through Data Analysis and Machine Learning | D. P. Singh et al. (2024) | IEEE TIACOMP<br>DOI: 10.1109/TIACOMP64125.2024.00085 | Unverified, check before citing | RF, DT, LR + SMOTE | Mitigating class imbalance improved subscription recall from ~30% to >70%, avoiding majority class dominance. Confirms our class-weighting design. |
+| 3 | Innovative Approaches of Machine Learning to Enhance Predictive Analytics Based on Banking Institution Strategies | A. K. Dixit & R. Kokila (2024) | IEEE ICONAT<br>IEEE Doc: 10700543 | Unverified, check before citing | KNN, LR, NB, DT, RF, XGBoost | Normalization and ensemble stacking reached high accuracy. Confirms the necessity of `StandardScaler` for continuous attributes. |
+| 4 | Bayesian Regression for Predicting Subscription to Bank Term Deposits in Direct Marketing Campaigns | M. F. Tanvir et al. (2024) | IEEE DASA / arXiv<br>DOI: 10.48550/arXiv.2410.21539 | Verified | Bayesian Logit, Probit, Logit | Calibrated probabilistic outputs prevent binary cutoff errors, justifying continuous probability scores and risk gauge charts. |
+| 5 | A Study on Improving Banking Process for Predicting Prospective Customers of Term Deposits Using Explainable Machine Learning Models | M. Z. Khan et al. (2021) | Springer LNCS (vol. 12956)<br>DOI: 10.1007/978-3-030-87010-9_8 | Unverified, check before citing | RF, DT, LR, SHAP | Balance and previous campaign history are primary predictors; explainable attribution is mandatory for banking compliance. |
 
 ---
 
@@ -72,14 +73,15 @@ The table below summarizes five peer-reviewed papers (2021–2024) investigating
 
 ### Existing Telemarketing Approaches
 - **Manual Outbound Cold Calling:** Telemarketers call customer lists sorted arbitrarily or chronologically.
-- **Rule-Based Filtering:** Naive heuristics (e.g. calling only customers over 40) that fail to capture non-linear feature interactions.
+- **Rule-Based Filtering:** Naive heuristics that fail to capture non-linear feature interactions.
 - **High Wastage:** ~88% of calls are placed to disinterested customers, burning call center hours and generating customer friction.
 
 ### Proposed BankerEye System
-- **Machine Learning Propensity Scoring:** Customers ranked by algorithmic subscription probability.
+- **Machine Learning Propensity Scoring:** Customers ranked by calibrated algorithmic subscription probability.
 - **Leakage-Free Feature Processing:** Focuses purely on verifiable pre-call customer attributes.
 - **Balanced Class Weighting:** Counteracts the 88/12 class imbalance to prioritize recall for actual depositors.
-- **Explainable Decision Drivers:** Identifies specific financial attributes driving high conversion likelihood.
+- **Calibrated Posterior Probabilities:** Minimizes Brier scores through 3-fold cross-validated isotonic regression.
+- **Validation-Tuned Decision Thresholds:** Maximizes operational F1 rather than defaulting to arbitrary 0.5 cutoffs.
 
 ---
 
@@ -99,92 +101,60 @@ The table below summarizes five peer-reviewed papers (2021–2024) investigating
          +---------------------------+---------------------------+
          |                                                       |
          v                                                       v
-+-----------------------------------+   +---------------------------------+
-|       Preprocessing Engine        |   |       Inference & Scoring       |
-| - Delimiter Detection (csv)       |   | - Single Customer Profiler      |
-| - Duration Exclusion Safeguard    |   | - High-Throughput CSV Batch     |
-| - OneHotEncoder + StandardScaler  |   | - Probability Gauge Engine      |
-+-----------------+-----------------+   +----------------+----------------+
-                  |                                      |
-                  v                                      v
-+-------------------------------------------------------------------------+
-|                  Scikit-Learn ML Pipelines & Joblib                     |
-|  [Logistic Regression] [Decision Tree] [KNN Classifier] [Random Forest] |
-+------------------------------------+------------------------------------+
-                                     |
-                                     v
-+-------------------------------------------------------------------------+
-|              UCI Bank Marketing Benchmark (bank-full.csv)               |
-|            45,211 Instances | 17 Attributes | Semicolon Delimited       |
-+-------------------------------------------------------------------------+
++---------------------------------+     +---------------------------------+
+|      Preprocessing Service      |     |     Model Training Service      |
+| - Delimiter Detection           |     | - Stratified 5-Fold GridSearch  |
+| - PdaysFeatureEngineer          |     | - Isotonic Calibration (CV=3)   |
+| - ColumnTransformer Pipeline    |     | - Optimal Threshold Tuning      |
+| - Duration Exclusion Guard      |     | - 500-Iteration Bootstrap CIs   |
++---------------------------------+     +---------------------------------+
 ```
 
 ---
 
-## 10. Dataset Description and Source
-- **Source:** UCI Machine Learning Repository — Bank Marketing Dataset ([Moro et al., 2011/2014](https://archive.ics.uci.edu/dataset/222/bank+marketing)).
-- **File:** `dataset/bank-full.csv` (semicolon `;` delimited, 45,211 instances).
-- **Target Variable:** `y` (Binary: `no` = 39,922 [88.30%], `yes` = 5,289 [11.70%]).
-- **Attributes Analyzed:**
-  1. *Demographic:* `age` (numeric), `job` (12 categories), `marital` (3 categories), `education` (4 categories).
-  2. *Credit & Financial:* `default` (credit default: yes/no), `balance` (yearly balance in EUR), `housing` (housing loan: yes/no), `loan` (personal loan: yes/no).
-  3. *Campaign & Timing:* `contact` (cellular, telephone, unknown), `day` (1–31), `month` (jan–dec), `campaign` (contacts count).
-  4. *Previous History:* `pdays` (days since previous contact, -1 = never), `previous` (contacts count), `poutcome` (outcome of previous campaign: unknown, failure, other, success).
-  5. *Excluded:* `duration` (call duration in seconds, excluded to avoid target leakage).
+## 10. Dataset and Preprocessing Pipeline
+- **Benchmark Source:** UCI Machine Learning Repository — Bank Marketing Dataset ([Moro et al., 2014](https://archive.ics.uci.edu/dataset/222/bank+marketing)).
+- **Observations:** 45,211 observational campaign calls from a Portuguese retail bank.
+- **Target Distribution:** 39,922 'no' (88.30%) and 5,289 'yes' (11.70%).
+- **Categorical Handling:** One-hot encoded via `OneHotEncoder(handle_unknown="ignore")`.
+- **Numerical Scaling:** Standardized via `StandardScaler`.
+- **Feature Engineering:** `PdaysFeatureEngineer` detects `pdays == -1` to generate a binary `never_contacted` flag and sets `pdays = 0` within the Scikit-learn pipeline, preserving inference consistency.
 
 ---
 
-## 11. Data Cleaning and Preprocessing
-1. **Delimiter Detection:** `csv.Sniffer` analyzes file header bytes, identifying the semicolon `;` delimiter automatically.
-2. **Missing-Value Analysis:** Evaluated 45,211 rows; zero `NaN`/`Null` values detected.
-3. **'Unknown' Category Treatment:** In banking domain surveys, `unknown` reflects an informative response rather than random missing data. For example, `poutcome = 'unknown'` precisely corresponds to `pdays = -1` (prospects who were never previously contacted). Therefore, `unknown` is retained as a valid categorical level.
-4. **Anti-Leakage Exclusion:** Feature `duration` is excised before train/test splitting.
-5. **Stratified Splitting:** 80% train (36,168 instances), 20% test (9,043 instances) with target stratification and fixed random state 42.
-6. **Feature Transformation:**
-   - Numerical columns (`age`, `balance`, `day`, `campaign`, `pdays`, `previous`) transformed via `StandardScaler()`.
-   - Categorical columns (`job`, `marital`, `education`, `default`, `housing`, `loan`, `contact`, `month`, `poutcome`) transformed via `OneHotEncoder(handle_unknown='ignore', sparse_output=False)`.
-   - Transformations are fitted exclusively on the training split to guarantee zero information leakage.
-
----
-
-## 12. Exploratory Data Analysis (EDA)
-- **Class Imbalance:** 88.3% non-subscribers vs 11.7% subscribers (7.55 to 1 ratio).
-- **Age Distribution:** Spans 18 to 95 years, with a mean of 40.94 and median of 39. Peak subscription rates occur in clients under 25 (students) and over 60 (retirees).
-- **Balance Distribution:** Heavy right-skewed distribution spanning -8,019 EUR to 102,127 EUR (mean: 1,362 EUR, median: 448 EUR). Higher liquidity positively correlates with deposit subscription.
-- **Housing Loans:** 55.6% of contacts have existing housing loans; clients with housing loans exhibit significantly lower term deposit conversion rates due to monthly debt service obligations.
-- **Previous Campaign Outcome:** Clients with `poutcome = 'success'` convert at over 60%, representing the single strongest historical signal.
-
----
-
-## 13. Methodology and Algorithm Descriptions
+## 11. Methodology and Algorithm Descriptions
 
 ### Model 1: Logistic Regression
-- **Mathematical Basis:** Models log-odds as a linear combination of features:
+- **Mathematical Basis:** Models log-odds as a linear combination of predictors:
   $$P(y=1|X) = \frac{1}{1 + e^{-(\beta_0 + \sum \beta_i X_i)}}$$
-- **Hyperparameters:** `solver='lbfgs'`, `max_iter=1000`, `class_weight='balanced'`, `random_state=42`.
-- **Role:** Serves as a well-calibrated, highly interpretable baseline.
+- **Hyperparameters:** `solver='lbfgs'`, `max_iter=1000`, `C=1.0`, `class_weight='balanced'`, `random_state=42`.
+- **Calibration:** `CalibratedClassifierCV(method='isotonic', cv=3)`.
+- **Optimal Threshold:** 0.25 (tuned to maximize F1).
 
 ### Model 2: Decision Tree Classifier
-- **Mathematical Basis:** Recursively partitions the feature space to minimize Gini Impurity:
+- **Mathematical Basis:** Partitions feature space using recursive binary splitting to minimize Gini Impurity:
   $$I_G(p) = 1 - \sum_{i=1}^C p_i^2$$
-- **Hyperparameters:** `max_depth=6`, `min_samples_split=25`, `min_samples_leaf=15`, `class_weight='balanced'`, `random_state=42`.
-- **Role:** Produces human-interpretable boolean decision thresholds.
+- **Hyperparameters:** `max_depth=10`, `min_samples_split=20`, `class_weight='balanced'`, `random_state=42`.
+- **Calibration:** `CalibratedClassifierCV(method='isotonic', cv=3)`.
+- **Optimal Threshold:** 0.22 (tuned to maximize F1).
 
 ### Model 3: K-Nearest Neighbours (KNN)
-- **Mathematical Basis:** Non-parametric instance-based classifier assigning class labels based on distance-weighted voting among nearest neighbors in Euclidean feature space:
+- **Mathematical Basis:** Non-parametric instance-based voting among nearest neighbors in standardized Euclidean space:
   $$d(x, x') = \sqrt{\sum_{i=1}^p (x_i - x'_i)^2}$$
-- **Hyperparameters:** `n_neighbors=9`, `weights='distance'`, `metric='minkowski'`, `p=2`.
-- **Role:** Evaluates geometric cluster density among customer profiles.
+- **Hyperparameters:** `n_neighbors=5`, `metric='minkowski'`, `p=2`. (Note: KNN does not support `class_weight`).
+- **Calibration:** `CalibratedClassifierCV(method='isotonic', cv=3)`.
+- **Optimal Threshold:** 0.17 (tuned to maximize F1).
 
 ### Model 4: Random Forest Classifier
-- **Mathematical Basis:** Bagging ensemble constructing $B=100$ decorrelated decision trees using bootstrap aggregation and random feature sub-sampling:
+- **Mathematical Basis:** Bagging ensemble of $B=100$ decorrelated decision trees with random feature sub-sampling:
   $$\hat{y} = \text{mode} \{ T_1(X), T_2(X), \dots, T_B(X) \}$$
-- **Hyperparameters:** `n_estimators=100`, `max_depth=10`, `min_samples_split=15`, `class_weight='balanced'`, `random_state=42`.
-- **Role:** Top-performing ensemble minimizing variance and capturing complex non-linear feature interactions.
+- **Hyperparameters:** `n_estimators=100`, `max_depth=12`, `class_weight='balanced'`, `random_state=42`.
+- **Calibration:** `CalibratedClassifierCV(method='isotonic', cv=3)`.
+- **Optimal Threshold:** 0.22 (tuned to maximize F1).
 
 ---
 
-## 14. Train/Test Split and Experimental Setup
+## 12. Train/Test Split and Experimental Setup
 - **Dataset Partitioning:** 80% Training ($N_{train} = 36,168$), 20% Held-Out Testing ($N_{test} = 9,043$).
 - **Stratification:** Maintained identical positive target ratio (11.70%) across both partitions.
 - **Hardware/Software Environment:** Windows x64, Python 3.11.9, Scikit-Learn 1.9.0, Pandas 2.2.3, Flask 3.0.3, Streamlit 1.66.1.
@@ -192,122 +162,58 @@ The table below summarizes five peer-reviewed papers (2021–2024) investigating
 
 ---
 
-## 15. Implementation Details
-The project is organized in a modular, decoupled Python architecture:
-- `backend/config.py`: Directory paths, feature lists, environment variables.
-- `backend/services/preprocessing.py`: CSV loading, delimiter detection, summary extraction, `ColumnTransformer` builder.
-- `backend/services/train_models.py`: Pipeline execution, metric computation, joblib serialization, multi-threading mutex training lock.
-- `backend/services/prediction.py`: Schema validation, single customer inference, batch DataFrame scoring.
-- `backend/services/report_service.py`: Structured JSON reports, CSV exports, ReportLab PDF generation.
-- `frontend/streamlit_app.py`: Entrypoint and system overview.
-- `frontend/pages/`: 6 dedicated analytics, comparison, prediction, and reporting pages.
-- `frontend/utils/api_client.py`: Robust requests client with timeout handling.
-
----
-
-## 16. Flask REST API Design
-The backend exposes clean RESTful JSON endpoints:
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/health` | Returns operational health status, dataset availability, and trained model flags. |
-| `GET` | `/api/dataset/summary` | Returns dataset row/col counts, data types, missing values, and distributions. |
-| `GET` | `/api/dataset/sample?limit=10` | Returns a bounded sample of preview records (prevents complete data exposure). |
-| `POST` | `/api/models/train` | Triggers stratified training of all 4 models; returns metrics and rankings. |
-| `GET` | `/api/models/compare` | Returns measured evaluation metrics, ROC curves, and rankings for all models. |
-| `GET` | `/api/models/<name>/metrics` | Returns metrics and confusion matrix for a specific model key. |
-| `GET` | `/api/models/feature-importance` | Returns top predictive features with non-causal disclaimer. |
-| `POST` | `/api/predict` | Validates customer JSON payload and returns prediction, probability, and insights. |
-| `POST` | `/api/predict/batch` | Scores multiple customer records in order, returning conversion rates and probabilities. |
-| `GET` | `/api/reports/evaluation` | Returns structured evaluation summary JSON. |
-| `GET` | `/api/reports/metrics-csv` | Streams downloadable metrics comparison CSV. |
-| `GET` | `/api/reports/pdf` | Streams downloadable formal academic PDF evaluation report. |
-
----
-
-## 17. Streamlit User Interface
-The frontend provides a polished banking analytics user experience:
-1. **Executive Dashboard (`1_Dashboard.py`):** Real-time KPI counters, class distribution donut chart, and model comparison preview.
-2. **Dataset Explorer (`2_Dataset_Explorer.py`):** Interactive preview table with target filtering, data dictionary, descriptive statistics, and EDA distributions.
-3. **Model Comparison (`3_Model_Comparison.py`):** 4 side-by-side model cards, dynamic metric ranking, grouped bar chart, ROC curves, and confusion matrix heatmaps.
-4. **Subscription Predictor (`4_Subscription_Predictor.py`):** Structured form for customer demographic, credit, and campaign history profiling; probability gauge chart; contextual advice; strict disclaimer.
-5. **Batch Prediction (`5_Batch_Prediction.py`):** Drag & drop CSV upload, schema check, downloadable test template, conversion summary, and exportable predictions CSV.
-6. **Reports & Academic Insights (`6_Reports_and_Insights.py`):** Literature review matrix, automated interpretation, and one-click PDF/CSV downloads.
-
----
-
-## 18. Experimental Results: Empirical Four-Model Benchmark
+## 13. Experimental Results: Empirical Four-Model Benchmark
 All results measured on the held-out test split of 9,043 instances (excluding `duration`):
 
-| Algorithm | Accuracy | Precision (yes) | Recall (yes) | F1-Score (yes) | ROC-AUC | Training Time | Prediction Latency |
-|---|---|---|---|---|---|---|---|
-| **Random Forest Classifier** | 81.43% | 32.55% | 59.26% | 42.08% | **79.46%** | 3.25s | 45.2ms |
-| **Decision Tree Classifier** | 80.38% | 32.14% | **62.48%** | **42.18%** | 75.02% | 0.28s | 8.5ms |
-| **Logistic Regression** | 75.48% | 26.62% | 62.38% | 37.32% | 77.22% | 0.51s | 3.5ms |
-| **K-Nearest Neighbours (KNN)**| **87.15%** | 39.40% | 22.87% | 28.94% | 72.66% | 0.12s | 340.0ms |
+| Algorithm | Accuracy | Precision (yes) | Recall (yes) | F1-Score (yes) | 95% Bootstrap CI (F1) | ROC-AUC | 95% CI (ROC-AUC) | Brier Score |
+|---|---|---|---|---|---|---|---|---|
+| **Random Forest Classifier** | 86.97% | 44.91% | 50.00% | 47.32% | [0.4464, 0.4965] | **79.86%** | [0.7841, 0.8138] | **0.0822** |
+| **Decision Tree Classifier** | **88.00%** | **48.66%** | 46.41% | **47.51%** | [0.4468, 0.5011] | 77.76% | [0.7611, 0.7947] | 0.0834 |
+| **Logistic Regression** | 87.84% | 47.76% | 42.34% | 44.89% | [0.4217, 0.4732] | 77.20% | [0.7578, 0.7889] | 0.0850 |
+| **K-Nearest Neighbours (KNN)**| 86.42% | 41.13% | 37.24% | 39.09% | [0.3649, 0.4179] | 72.33% | [0.7056, 0.7416] | 0.0897 |
 
 ---
 
-## 19. Figures and Confusion Matrices
+## 14. Figures and Confusion Matrices
 On the held-out test split of 9,043 instances (7,985 actual non-subscribers, 1,058 actual subscribers):
 
 ### Random Forest Classifier
-- **True Negatives (TN):** 6,707 | **False Positives (FP):** 1,278
-- **False Negatives (FN):** 431 | **True Positives (TP):** 627
+- **True Negatives (TN):** 7,336 | **False Positives (FP):** 649
+- **False Negatives (FN):** 529 | **True Positives (TP):** 529
 
 ### Decision Tree Classifier
-- **True Negatives (TN):** 6,590 | **False Positives (FP):** 1,395
-- **False Negatives (FN):** 397 | **True Positives (TP):** 661
+- **True Negatives (TN):** 7,467 | **False Positives (FP):** 518
+- **False Negatives (FN):** 567 | **True Positives (TP):** 491
 
 ### Logistic Regression
-- **True Negatives (TN):** 6,166 | **False Positives (FP):** 1,819
-- **False Negatives (FN):** 398 | **True Positives (TP):** 660
+- **True Negatives (TN):** 7,495 | **False Positives (FP):** 490
+- **False Negatives (FN):** 610 | **True Positives (TP):** 448
 
 ### K-Nearest Neighbours (KNN)
-- **True Negatives (TN):** 7,614 | **False Positives (FP):** 371
-- **False Negatives (FN):** 816 | **True Positives (TP):** 242
+- **True Negatives (TN):** 7,421 | **False Positives (FP):** 564
+- **False Negatives (FN):** 664 | **True Positives (TP):** 394
 
 ---
 
-## 20. Results and Discussion
-1. **The Accuracy Paradox:** KNN attained the highest raw accuracy (**87.15%**), yet it failed on over 77% of actual subscribers (Recall: 22.87%, F1: 28.94%). This demonstrates the accuracy paradox in imbalanced banking data: predicting the majority class universally produces high accuracy while generating zero commercial utility.
-2. **Discriminative Champion:** **Random Forest** achieved the highest ROC-AUC (**79.46%**), demonstrating that bagging decorrelated decision trees effectively separates subscriber and non-subscriber distributions without feature leakage.
-3. **Harmonic Balance Champion:** **Decision Tree** attained the highest F1-Score (**42.18%**) and top Recall (**62.48%**), capturing nearly two-thirds of all interested term deposit customers.
+## 15. Results and Discussion
+1. **Statistical Distinguishability:** The 95% bootstrap confidence intervals for Decision Tree [0.4468, 0.5011] and Random Forest [0.4464, 0.4965] overlap. Consequently, their performances are **not statistically distinguishable** on this held-out test set.
+2. **Discriminative Capability:** **Random Forest** achieved the highest ROC-AUC (**79.86%**), demonstrating strong ranking capability across classification thresholds.
+3. **Calibrated Probability Alignment:** By applying 3-fold cross-validated isotonic calibration, all four algorithms achieved Brier scores under 0.090, confirming that output probability estimates reflect genuine empirical conversion frequencies.
 4. **Telemarketing Campaign Trade-Off:** In retail banking, false positives cost modest telephone toll charges, while false negatives cost valuable long-term deposit capital. Decision Tree and Random Forest provide the ideal operational balance for outbound outreach teams.
 
 ---
 
-## 21. Limitations & Ethical Considerations
+## 16. Limitations & Ethical Considerations
 - **Non-Causal Association:** Machine learning feature importance rankings reflect statistical correlation within historical observations. They must not be construed as definitive causal mechanisms.
 - **Fair Lending Compliance:** Customer demographic features (age, marital status, job) must be audited to ensure algorithms do not perpetuate discriminatory lending practices prohibited under fair lending laws.
 - **Model Role:** BankerEye is strictly an operational decision-support tool designed to sequence outreach lists. It does not possess authority to autonomously deny banking services.
 
 ---
 
-## 22. Future Scope and Conclusion
-
-### Future Scope
-1. **Economic Context Integration:** Enriching customer records with macroeconomic indicators (e.g. Euribor 3-month rates, consumer price indices) available in the extended UCI benchmark.
-2. **Active Learning Feedback Loop:** Dynamically updating model weights based on live call outcome feedback streaming from call center CRMs.
-3. **Advanced Calibration:** Implementing isotonic regression and Platt scaling to further refine predicted probabilities.
-
-### Conclusion
-The **BankerEye** Bank Marketing Subscription Prediction System successfully demonstrates an end-to-end, production-grade machine learning application. By enforcing an anti-leakage architecture, benchmarking four diverse algorithms, providing a robust Flask API and Streamlit UI, and deploying comprehensive automated reporting, the project fulfills all technical, empirical, and academic requirements.
-
----
-
-## References
+## 17. References
 1. S. Moro, P. Cortez, and P. Rita, "A data-driven approach to predict the success of bank telemarketing," *Decision Support Systems*, vol. 62, pp. 22–31, 2014. [DOI: 10.1016/j.dss.2014.03.001]
-2. N. Alessa et al., "Banking in Terms of Deposit Prediction Based on Machine Learning and Big Data Analytics," *2023 11th International Conference on Control, Mechatronics and Automation (ICCMA)*, pp. 1–6, 2023. [DOI: 10.1109/ICCMA59762.2023.10374595]
-3. D. P. Singh et al., "Enhancing Marketing Strategies: Analyzing Customer Behavior in Banking through Data Analysis and Machine Learning," *2024 Trends in Information and Advanced Computing (TIACOMP)*, pp. 1–6, 2024. [DOI: 10.1109/TIACOMP64125.2024.00085]
-4. A. K. Dixit and R. Kokila, "Innovative Approaches of Machine Learning to Enhance Predictive Analytics Based on Banking Institution Strategies," *2024 3rd International Conference for Advancement in Technology (ICONAT)*, IEEE Doc: 10700543, 2024.
-5. M. F. Tanvir, M. M. Hossain, and M. A. Jishan, "Bayesian Regression for Predicting Subscription to Bank Term Deposits in Direct Marketing Campaigns," *International Conference on Decision Aid Sciences and Applications (DASA)*, arXiv:2410.21539, 2024. [DOI: 10.48550/arXiv.2410.21539]
-6. M. Z. Khan, S. Munquad, and T. S. M. Rao, "A Study on Improving Banking Process for Predicting Prospective Customers of Term Deposits Using Explainable Machine Learning Models," *Computational Science and Its Applications — ICCSA 2021*, LNCS vol. 12956, Springer, pp. 93–103, 2021. [DOI: 10.1007/978-3-030-87010-9_8]
-
----
-
-## Appendix: Execution and Environment Instructions
-See `README.md` for Windows PowerShell execution instructions:
-- Backend: `python backend/app.py` (Runs on `http://127.0.0.1:5000`)
-- Frontend: `streamlit run frontend/streamlit_app.py` (Runs on `http://localhost:8501`)
-- Test Suite: `pytest -v`
+2. N. Alessa et al., "Banking in Terms of Deposit Prediction Based on Machine Learning and Big Data Analytics," *2023 11th International Conference on Control, Mechatronics and Automation (ICCMA)*, pp. 1–6, 2023. [DOI: 10.1109/ICCMA59762.2023.10374595] *(Unverified)*
+3. D. P. Singh et al., "Enhancing Marketing Strategies: Analyzing Customer Behavior in Banking through Data Analysis and Machine Learning," *2024 Trends in Information and Advanced Computing (TIACOMP)*, pp. 1–6, 2024. [DOI: 10.1109/TIACOMP64125.2024.00085] *(Unverified)*
+4. A. K. Dixit and R. Kokila, "Innovative Approaches of Machine Learning to Enhance Predictive Analytics Based on Banking Institution Strategies," *2024 3rd International Conference for Advancement in Technology (ICONAT)*, IEEE Doc: 10700543, 2024. *(Unverified)*
+5. M. F. Tanvir, M. M. Hossain, and M. A. Jishan, "Bayesian Regression for Predicting Subscription to Bank Term Deposits in Direct Marketing Campaigns," *International Conference on Decision Aid Sciences and Applications (DASA)*, arXiv:2410.21539, 2024. [DOI: 10.48550/arXiv.2410.21539] *(Verified)*
+6. M. Z. Khan, S. Munquad, and T. S. M. Rao, "A Study on Improving Banking Process for Predicting Prospective Customers of Term Deposits Using Explainable Machine Learning Models," *Computational Science and Its Applications — ICCSA 2021*, LNCS vol. 12956, Springer, pp. 93–103, 2021. [DOI: 10.1007/978-3-030-87010-9_8] *(Unverified)*

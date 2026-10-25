@@ -1,10 +1,12 @@
 import logging
+import uuid
 from flask import Blueprint, jsonify, request
 
 from backend.services.train_models import (
     MODEL_DEFINITIONS,
     get_cached_metrics,
-    train_and_evaluate_all_models,
+    get_training_job_status,
+    start_background_training_job,
 )
 
 logger = logging.getLogger(__name__)
@@ -14,30 +16,82 @@ model_bp = Blueprint("models", __name__, url_prefix="/api/models")
 @model_bp.route("/train", methods=["POST"])
 def train_models():
     """
-    Trains all four primary machine learning models, evaluates on the held-out test set,
-    and returns metrics, rankings, and durations.
+    Initiates asynchronous background model training across all four algorithms.
+    Returns 202 Accepted immediately with a unique job ID for progress polling.
     """
     try:
-        data = request.get_json(silent=True) or {}
-        test_size = float(data.get("test_size", 0.20))
-        force_retrain = bool(data.get("force_retrain", True))
+        data = {}
+        if request.data and request.data.strip():
+            if not request.is_json:
+                return jsonify({
+                    "status": "error",
+                    "message": "Content-type must be application/json when sending a request body.",
+                }), 400
 
-        if not (0.05 <= test_size <= 0.5):
-            return jsonify({
-                "status": "error",
-                "message": "test_size must be between 0.05 and 0.50",
-            }), 400
+            data = request.get_json(silent=True)
+            if data is None or not isinstance(data, dict):
+                return jsonify({
+                    "status": "error",
+                    "message": "Request body must be a valid JSON object.",
+                }), 400
 
-        results = train_and_evaluate_all_models(
+        # Validate test_size
+        test_size = 0.20
+        if "test_size" in data:
+            raw_ts = data["test_size"]
+            if isinstance(raw_ts, bool) or not isinstance(raw_ts, (int, float)):
+                return jsonify({
+                    "status": "error",
+                    "message": "Parameter 'test_size' must be a numeric float.",
+                }), 400
+            try:
+                test_size = float(raw_ts)
+                if not (0.05 <= test_size <= 0.50):
+                    return jsonify({
+                        "status": "error",
+                        "message": "Parameter 'test_size' must be between 0.05 and 0.50.",
+                    }), 400
+            except (ValueError, TypeError):
+                return jsonify({
+                    "status": "error",
+                    "message": "Parameter 'test_size' must be a valid number.",
+                }), 400
+
+        # Validate force_retrain (parsing 'false', 'true', booleans properly)
+        force_retrain = True
+        if "force_retrain" in data:
+            raw_force = data["force_retrain"]
+            if isinstance(raw_force, bool):
+                force_retrain = raw_force
+            elif isinstance(raw_force, str):
+                lower_val = raw_force.strip().lower()
+                if lower_val in ("true", "1", "yes"):
+                    force_retrain = True
+                elif lower_val in ("false", "0", "no"):
+                    force_retrain = False
+                else:
+                    return jsonify({
+                        "status": "error",
+                        "message": "Parameter 'force_retrain' must be a boolean ('true' or 'false').",
+                    }), 400
+            else:
+                return jsonify({
+                    "status": "error",
+                    "message": "Parameter 'force_retrain' must be a boolean.",
+                }), 400
+
+        # Launch background training thread
+        job_id = start_background_training_job(
             test_size=test_size,
+            random_state=42,
             force_retrain=force_retrain,
         )
 
         return jsonify({
-            "status": "success",
-            "message": "All four models trained and evaluated successfully.",
-            "data": results,
-        }), 200
+            "status": "accepted",
+            "message": "Model training initiated as a background job.",
+            "job_id": job_id,
+        }), 202
 
     except RuntimeError as e:
         # Concurrent training attempt
@@ -45,21 +99,33 @@ def train_models():
     except FileNotFoundError as e:
         return jsonify({"status": "error", "message": str(e)}), 404
     except Exception as e:
-        logger.error(f"Error during model training: {e}")
-        return jsonify({"status": "error", "message": f"Training failed: {str(e)}"}), 500
+        req_id = str(uuid.uuid4())
+        logger.exception(f"Error launching training job [req_id={req_id}]: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "An internal server error occurred.",
+            "request_id": req_id,
+        }), 500
+
+
+@model_bp.route("/train/status", methods=["GET"])
+def get_training_status():
+    """Returns current state (idle/running/done/failed), progress percentage, and error if any."""
+    status_info = get_training_job_status()
+    return jsonify(status_info), 200
 
 
 @model_bp.route("/compare", methods=["GET"])
 def compare_models():
-    """Returns actual evaluation metrics, rankings, and ROC/PR curve data for all trained models."""
+    """Returns actual evaluation metrics, rankings, curves, CIs, and temporal checks for all trained models."""
     metrics = get_cached_metrics()
     if not metrics:
         return jsonify({
             "status": "not_trained",
-            "message": "Models have not been trained yet. Please send a POST to /api/models/train.",
+            "message": "Models not trained. Run: python -m backend.services.train_models",
             "models": {},
             "rankings": {},
-        }), 200
+        }), 503
 
     return jsonify({
         "status": "ready",
@@ -68,6 +134,9 @@ def compare_models():
         "split_info": metrics.get("split_info"),
         "models": metrics.get("models"),
         "rankings": metrics.get("rankings"),
+        "statistical_verdict": metrics.get("statistical_verdict"),
+        "is_top_model_distinguishable": metrics.get("is_top_model_distinguishable"),
+        "temporal_check": metrics.get("temporal_check"),
         "total_training_time_sec": metrics.get("total_training_time_sec"),
     }), 200
 
@@ -86,8 +155,8 @@ def get_single_model_metrics(model_name: str):
     if not metrics or model_key not in metrics.get("models", {}):
         return jsonify({
             "status": "not_trained",
-            "message": f"Metrics for '{model_name}' are not available yet. Please train models first.",
-        }), 404
+            "message": "Models not trained. Run: python -m backend.services.train_models",
+        }), 503
 
     return jsonify({
         "status": "success",
@@ -98,24 +167,17 @@ def get_single_model_metrics(model_name: str):
 
 @model_bp.route("/feature-importance", methods=["GET"])
 def get_feature_importance():
-    """
-    Returns feature importance rankings for supported models.
-    Explicitly clarifies that feature importance measures predictive contribution, not causation.
-    """
+    """Returns grouped permutation feature importances for ensemble models."""
     metrics = get_cached_metrics()
-    if not metrics or "feature_importance" not in metrics:
+    if not metrics:
         return jsonify({
             "status": "not_trained",
-            "message": "Feature importance data is not available. Please train models first.",
-            "feature_importance": {},
-        }), 200
+            "message": "Models not trained. Run: python -m backend.services.train_models",
+        }), 503
 
+    importances = metrics.get("feature_importance", {})
     return jsonify({
         "status": "success",
-        "feature_importance": metrics.get("feature_importance", {}),
-        "disclaimer": (
-            "Feature importance rankings quantify statistical contribution within the decision trees and "
-            "regularized linear coefficients. They indicate correlation with customer subscription behavior "
-            "in the dataset and do not establish causal relationships."
-        ),
+        "feature_importance": importances,
+        "disclaimer": "Feature importances are computed via permutation on the held-out test set with one-hot encoded features grouped back to their original domain attributes.",
     }), 200

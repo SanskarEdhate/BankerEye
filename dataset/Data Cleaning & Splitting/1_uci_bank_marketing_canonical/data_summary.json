@@ -38,10 +38,10 @@
   "leakage_prevention_policy": "The feature 'duration' is preserved in raw/clean CSVs for data fidelity, but must be strictly excluded from outbound telemarketing predictive training to prevent severe target leakage.",
   "timestamp": "2026-10-25T18:49:06.117664",
   "stages": {
-    "01_Raw_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\01_Raw_Data\\bank-full.csv",
-    "02_Unclean_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\02_Unclean_Data\\bank-full.csv",
-    "03_Clean_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\03_Clean_Data\\bank-full_clean.csv",
-    "04_Train_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\04_Train_Data\\train.csv",
-    "05_Test_Data": "dataset\\Data Cleaning & Splitting\\1_uci_bank_marketing_canonical\\05_Test_Data\\test.csv"
+    "01_Raw_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/01_Raw_Data/bank-full.csv",
+    "02_Unclean_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/02_Unclean_Data/bank-full.csv",
+    "03_Clean_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/03_Clean_Data/bank-full_clean.csv",
+    "04_Train_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/04_Train_Data/train.csv",
+    "05_Test_Data": "dataset/Data Cleaning & Splitting/1_uci_bank_marketing_canonical/05_Test_Data/test.csv"
   }
 }
