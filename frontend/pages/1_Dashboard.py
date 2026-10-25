@@ -19,7 +19,10 @@ from frontend.components.charts import (
     render_grouped_metrics_bar,
 )
 
-st.set_page_config(page_title="Dashboard | BankerEye ML", page_icon="📊", layout="wide")
+try:
+    st.set_page_config(page_title="Dashboard | BankerEye ML", page_icon="📊", layout="wide")
+except Exception:
+    pass
 apply_custom_css()
 
 st.markdown(

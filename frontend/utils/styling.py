@@ -35,18 +35,37 @@ def apply_custom_css():
         color: #0f172a !important;
     }
 
+    /* Hide Streamlit Default Deploy Button, App Toolbar & Header Clutter */
+    [data-testid="stToolbar"],
+    .stDeployButton,
+    [data-testid="stDecoration"],
+    #MainMenu,
+    footer {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        opacity: 0 !important;
+    }
+
     [data-testid="stHeader"] {
-        background-color: #f8fafc !important;
-        border-bottom: 1px solid rgba(226, 232, 240, 0.7) !important;
+        background-color: transparent !important;
+        border-bottom: none !important;
+        height: 0px !important;
+        pointer-events: none !important;
+    }
+
+    [data-testid="stHeader"] button,
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"] {
+        pointer-events: auto !important;
+        visibility: visible !important;
     }
 
     /* CRITICAL: Preserve Streamlit Icon Fonts & Ligatures (Eliminates 'keyboard_double' text leak) */
-    [data-testid*="Icon"], 
+    [data-testid="stIconMaterial"],
     [data-testid="stSidebarCollapseButton"] *,
     [data-testid="stSidebarCollapseButton"] span,
     [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stIcon"],
-    [data-testid="stIconMaterial"],
     .material-symbols-rounded,
     .material-symbols-outlined,
     .material-icons,
@@ -65,10 +84,15 @@ def apply_custom_css():
         font-feature-settings: 'liga' 1 !important;
     }
 
-    /* Container constraints & padding */
+    /* Explicitly preserve emoji font for emoji icons */
+    [data-testid="stIconEmoji"] {
+        font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif !important;
+    }
+
+    /* Container constraints & breathing room - Prevents any clipping of page header banners */
     .block-container {
-        padding-top: 1.25rem !important;
-        padding-bottom: 2.5rem !important;
+        padding-top: 1.75rem !important;
+        padding-bottom: 2.75rem !important;
         max-width: 1240px !important;
     }
 
@@ -116,10 +140,133 @@ def apply_custom_css():
     }
 
     /* Streamlit Sidebar Enforcement (Clean White) */
-    section[data-testid="stSidebar"], [data-testid="stSidebarContent"] {
+    section[data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-right: 1px solid #e2e8f0 !important;
-        box-shadow: 2px 0 8px rgba(15, 23, 42, 0.02) !important;
+        box-shadow: 2px 0 12px rgba(15, 23, 42, 0.03) !important;
+    }
+
+    [data-testid="stSidebarContent"] {
+        background-color: #ffffff !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 1rem 1rem 1.5rem 1rem !important;
+    }
+
+    /* Re-order Sidebar so BankerEye Brand Header is firmly at the TOP */
+    [data-testid="stSidebarHeader"] {
+        order: 1 !important;
+        padding: 0 !important;
+        margin-bottom: 6px !important;
+    }
+
+    [data-testid="stSidebarUserContent"] {
+        order: 2 !important;
+        padding: 0 !important;
+        margin-bottom: 4px !important;
+    }
+
+    [data-testid="stSidebarNav"] {
+        order: 3 !important;
+        padding-top: 6px !important;
+    }
+
+    [data-testid="stSidebarNav"]::before {
+        content: "PLATFORM NAVIGATION" !important;
+        display: block !important;
+        font-size: 10.5px !important;
+        font-weight: 700 !important;
+        color: #94a3b8 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+        padding: 6px 12px 6px 12px !important;
+    }
+
+    /* Sidebar Brand Card */
+    .sidebar-brand-card {
+        background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 50%, #eff6ff 100%) !important;
+        border: 1px solid #bfdbfe !important;
+        border-radius: 12px !important;
+        padding: 14px 14px 12px 14px !important;
+        margin-bottom: 12px !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.07), 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+    }
+
+    .sidebar-brand-badge {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    .sidebar-brand-logo {
+        font-size: 24px !important;
+        line-height: 1 !important;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        padding: 6px !important;
+        box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .sidebar-brand-names {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .sidebar-brand-title {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.02em !important;
+        line-height: 1.15 !important;
+    }
+
+    .sidebar-brand-accent {
+        color: #2563eb !important;
+    }
+
+    .sidebar-brand-tagline {
+        font-size: 10.5px !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+        letter-spacing: 0.04em !important;
+        text-transform: uppercase !important;
+        margin-top: 2px !important;
+    }
+
+    .sidebar-brand-divider {
+        height: 1px !important;
+        background: #e2e8f0 !important;
+        margin: 10px 0 8px 0 !important;
+    }
+
+    .sidebar-brand-status {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #047857 !important;
+    }
+
+    .status-indicator-dot {
+        width: 7px !important;
+        height: 7px !important;
+        background-color: #10b981 !important;
+        border-radius: 50% !important;
+        display: inline-block !important;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
+        animation: pulse-dot 2s infinite ease-in-out !important;
+    }
+
+    @keyframes pulse-dot {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3); }
+        50% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3); }
     }
 
     section[data-testid="stSidebar"] * {
@@ -139,13 +286,16 @@ def apply_custom_css():
     /* Sidebar Navigation Links */
     [data-testid="stSidebarNav"] a {
         border-radius: 8px !important;
-        padding: 8px 12px !important;
+        padding: 9px 12px !important;
         margin: 2px 0 !important;
         transition: all 0.15s ease-in-out !important;
+        font-weight: 600 !important;
+        font-size: 13.5px !important;
     }
 
     [data-testid="stSidebarNav"] a:hover {
         background-color: #f1f5f9 !important;
+        color: #0f172a !important;
     }
 
     [data-testid="stSidebarNav"] a[aria-current="page"] {
@@ -492,3 +642,25 @@ def apply_custom_css():
     </style>
     """
     st.markdown(custom_css, unsafe_allow_html=True)
+
+
+def render_sidebar_branding():
+    """Renders executive BankerEye branding card at the top of the sidebar."""
+    branding_html = """
+    <div class="sidebar-brand-card">
+        <div class="sidebar-brand-badge">
+            <div class="sidebar-brand-logo">🏦</div>
+            <div class="sidebar-brand-names">
+                <div class="sidebar-brand-title">Banker<span class="sidebar-brand-accent">Eye</span></div>
+                <div class="sidebar-brand-tagline">Term Deposit Intelligence</div>
+            </div>
+        </div>
+        <div class="sidebar-brand-divider"></div>
+        <div class="sidebar-brand-status">
+            <span class="status-indicator-dot"></span>
+            <span>Production ML &bull; Online</span>
+        </div>
+    </div>
+    """
+    st.sidebar.markdown(branding_html, unsafe_allow_html=True)
+

@@ -17,7 +17,10 @@ from frontend.utils.api_client import (
 )
 from frontend.components.cards import render_kpi_card, render_info_banner
 
-st.set_page_config(page_title="Batch Prediction | BankerEye ML", page_icon="📁", layout="wide")
+try:
+    st.set_page_config(page_title="Batch Prediction | BankerEye ML", page_icon="📁", layout="wide")
+except Exception:
+    pass
 apply_custom_css()
 
 st.markdown(

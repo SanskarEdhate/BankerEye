@@ -3,13 +3,16 @@ import sys
 from pathlib import Path
 import streamlit as st
 
-# Configure page settings
-st.set_page_config(
-    page_title="BankerEye ML | Home",
-    page_icon="🏦",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+# Configure page settings if accessed directly
+try:
+    st.set_page_config(
+        page_title="BankerEye ML | Home",
+        page_icon="🏦",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
+except Exception:
+    pass
 
 # Add project root to sys.path
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,17 +25,6 @@ from frontend.components.cards import render_kpi_card, render_info_banner
 
 apply_custom_css()
 
-# Clean Sidebar: Only essential branding & live API status indicator
-with st.sidebar:
-    st.markdown("### 🏦 BankerEye ML")
-    st.caption("Term Deposit Intelligence")
-    st.markdown("---")
-
-    health = check_api_health()
-    if health.get("status") == "healthy":
-        st.caption("🟢 **Flask API:** Online & Ready")
-    else:
-        st.caption("🔴 **Flask API:** Offline")
 
 # Executive Header Banner
 st.markdown(

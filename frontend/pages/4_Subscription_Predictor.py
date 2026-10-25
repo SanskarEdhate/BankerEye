@@ -20,7 +20,10 @@ from frontend.components.charts import (
     render_model_accuracy_vs_probability_bar,
 )
 
-st.set_page_config(page_title="Subscription Predictor | BankerEye ML", page_icon="🎯", layout="wide")
+try:
+    st.set_page_config(page_title="Subscription Predictor | BankerEye ML", page_icon="🎯", layout="wide")
+except Exception:
+    pass
 apply_custom_css()
 
 st.markdown(

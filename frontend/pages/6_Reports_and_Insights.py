@@ -18,7 +18,10 @@ from frontend.utils.api_client import (
 )
 from frontend.components.cards import render_info_banner
 
-st.set_page_config(page_title="Reports & Insights | BankerEye ML", page_icon="📑", layout="wide")
+try:
+    st.set_page_config(page_title="Reports & Insights | BankerEye ML", page_icon="📑", layout="wide")
+except Exception:
+    pass
 apply_custom_css()
 
 st.markdown(

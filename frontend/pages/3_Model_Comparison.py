@@ -21,7 +21,10 @@ from frontend.components.charts import (
     render_feature_importance_chart,
 )
 
-st.set_page_config(page_title="Model Comparison | BankerEye ML", page_icon="⚖️", layout="wide")
+try:
+    st.set_page_config(page_title="Model Comparison | BankerEye ML", page_icon="⚖️", layout="wide")
+except Exception:
+    pass
 apply_custom_css()
 
 st.markdown(

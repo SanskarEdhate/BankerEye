@@ -5,19 +5,37 @@ import streamlit as st
 
 # Add project root to sys.path
 BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = Path(__file__).resolve().parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-# Use Streamlit Navigation to enforce clean page titles and icons across all routes
+from frontend.utils.styling import apply_custom_css, render_sidebar_branding
+
+# Set root application configuration
+st.set_page_config(
+    page_title="BankerEye ML | Term Deposit Intelligence",
+    page_icon="🏦",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+# Apply global styling stylesheet
+apply_custom_css()
+
+# Render BankerEye Brand Header at Top of Sidebar
+render_sidebar_branding()
+
+# Use Streamlit Navigation with resolved paths and Material icons
 pages = [
-    st.Page("Home.py", title="Home", icon="🏦", default=True),
-    st.Page("pages/1_Dashboard.py", title="Dashboard", icon="📊"),
-    st.Page("pages/2_Dataset_Explorer.py", title="Dataset Explorer", icon="🔍"),
-    st.Page("pages/3_Model_Comparison.py", title="Model Comparison", icon="⚖️"),
-    st.Page("pages/4_Subscription_Predictor.py", title="Subscription Predictor", icon="🎯"),
-    st.Page("pages/5_Batch_Prediction.py", title="Batch Prediction", icon="📁"),
-    st.Page("pages/6_Reports_and_Insights.py", title="Reports and Insights", icon="📑"),
+    st.Page(FRONTEND_DIR / "Home.py", title="Home", icon=":material/home:", default=True),
+    st.Page(FRONTEND_DIR / "pages" / "1_Dashboard.py", title="Dashboard", icon=":material/dashboard:"),
+    st.Page(FRONTEND_DIR / "pages" / "2_Dataset_Explorer.py", title="Dataset Explorer", icon=":material/dataset:"),
+    st.Page(FRONTEND_DIR / "pages" / "3_Model_Comparison.py", title="Model Comparison", icon=":material/compare_arrows:"),
+    st.Page(FRONTEND_DIR / "pages" / "4_Subscription_Predictor.py", title="Subscription Predictor", icon=":material/psychology:"),
+    st.Page(FRONTEND_DIR / "pages" / "5_Batch_Prediction.py", title="Batch Prediction", icon=":material/upload_file:"),
+    st.Page(FRONTEND_DIR / "pages" / "6_Reports_and_Insights.py", title="Reports & Insights", icon=":material/description:"),
 ]
 
 pg = st.navigation(pages)
 pg.run()
+
