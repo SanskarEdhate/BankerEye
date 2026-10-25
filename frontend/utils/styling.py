@@ -764,19 +764,23 @@ def _global_css() -> str:
         border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
-    /* KPI Cards (Clean White with Soft Elevation) */
+    /* KPI Cards (Clean White with Soft Elevation & Perfect Alignment) */
     .kpi-card {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 12px !important;
-        padding: 18px 20px !important;
-        margin-bottom: 14px !important;
-        min-height: 128px !important;
+        padding: 14px 15px !important;
+        margin-bottom: 12px !important;
+        height: 122px !important;
+        min-height: 122px !important;
+        max-height: 122px !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
+        box-sizing: border-box !important;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02) !important;
         transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease !important;
+        overflow: hidden !important;
     }
 
     .kpi-card:hover {
@@ -785,33 +789,55 @@ def _global_css() -> str:
         box-shadow: 0 10px 20px -3px rgba(15, 23, 42, 0.07), 0 4px 6px -2px rgba(15, 23, 42, 0.03) !important;
     }
 
+    .kpi-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        width: 100% !important;
+        margin: 0 !important;
+        min-height: 22px !important;
+        overflow: hidden !important;
+    }
+
     .kpi-label {
-        font-size: 11.5px !important;
+        font-size: 10.5px !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.06em !important;
+        letter-spacing: 0.03em !important;
         color: #64748b !important;
-        margin-bottom: 6px !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        margin: 0 !important;
     }
 
     .kpi-value {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 21px !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-size: 24px !important;
         font-weight: 800 !important;
         color: #0f172a !important;
-        line-height: 1.25 !important;
+        line-height: 1.15 !important;
         word-break: keep-all !important;
         overflow-wrap: normal !important;
         white-space: nowrap !important;
         text-overflow: ellipsis !important;
         overflow: hidden !important;
+        margin: 2px 0 !important;
     }
 
     .kpi-subtext {
-        font-size: 12px !important;
+        font-size: 11.5px !important;
+        font-weight: 500 !important;
         color: #64748b !important;
-        margin-top: 6px !important;
-        line-height: 1.4 !important;
+        line-height: 1.25 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin: 0 !important;
     }
 
     /* Model Cards */
@@ -922,12 +948,17 @@ def _global_css() -> str:
 
     /* Badges */
     .badge {
-        display: inline-block !important;
-        padding: 3px 8px !important;
-        border-radius: 6px !important;
-        font-size: 11px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
+        font-size: 10px !important;
         font-weight: 700 !important;
         letter-spacing: 0.02em !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
     }
 
     .badge-success {

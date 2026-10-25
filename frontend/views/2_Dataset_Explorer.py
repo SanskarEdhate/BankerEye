@@ -60,13 +60,13 @@ st.markdown(
 # Top Stats Row
 s1, s2, s3, s4 = st.columns(4)
 with s1:
-    render_kpi_card("Total Observations", f"{summary.get('total_rows', 0):,}", "bank-full.csv records", "UCI Benchmark", "info")
+    render_kpi_card("Total Records", f"{summary.get('total_rows', 0):,}", "bank-full.csv records", "UCI Benchmark", "info")
 with s2:
-    render_kpi_card("Total Columns", str(summary.get("total_columns", 0)), "16 features + 1 target (15 used in ML)", "17 Columns", "info")
+    render_kpi_card("Total Columns", str(summary.get("total_columns", 0)), "16 features + 1 target (15 in ML)", "17 Columns", "info")
 with s3:
     render_kpi_card("Missing Cells", str(summary.get("total_missing_cells", 0)), "0 null / NaN values", "Verified Clean", "success")
 with s4:
-    render_kpi_card("Duplicate Rows", str(summary.get("duplicate_rows", 0)), "0 duplicate entries", "Unique Records", "success")
+    render_kpi_card("Duplicate Rows", str(summary.get("duplicate_rows", 0)), "0 duplicate entries", "0 Duplicates", "success")
 
 # Tabs for Organized Navigation
 tab_inspector, tab_folders, tab_preview, tab_schema, tab_stats, tab_distributions, tab_download = st.tabs(

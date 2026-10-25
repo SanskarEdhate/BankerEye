@@ -36,7 +36,7 @@ with k1:
     tot_rows = summary.get("total_rows")
     val_pop = f"{tot_rows:,}" if tot_rows is not None else "Not loaded"
     render_kpi_card(
-        label="Dataset Population",
+        label="Total Population",
         value=val_pop,
         subtext="Historical campaign records",
         badge_text="Cleaned",
@@ -50,15 +50,15 @@ with k2:
             feat_val = str(len(feats))
         else:
             feat_val = str(split_info.get("feature_count", "N/A"))
-        feat_badge = f"{feat_val} Features (ML)"
+        feat_badge = f"{feat_val} Features"
     else:
         feat_val = "Not trained"
         feat_badge = "Pending"
 
     render_kpi_card(
-        label="Input Features Used",
+        label="Input Features",
         value=feat_val,
-        subtext="15 of 16 features (excludes 'duration')",
+        subtext="Excludes 'duration' (anti-leakage)",
         badge_text=feat_badge,
         badge_type="info" if models_ready else "warning",
     )
@@ -89,9 +89,9 @@ with k4:
         raw_name = comparison.get("rankings", {}).get("roc_auc", [{}])[0].get("display_name", "Random Forest")
         best_model = raw_name.replace(" Classifier", "").replace(" (KNN)", "")
         render_kpi_card(
-            label="Top Performing Model",
+            label="Top Model",
             value=best_model,
-            subtext="Ranked by ROC-AUC",
+            subtext="Ranked by test ROC-AUC",
             badge_text="4 Models Ready",
             badge_type="success",
         )

@@ -8,19 +8,22 @@ def render_kpi_card(
     badge_text: Optional[str] = None,
     badge_type: str = "info",
 ):
-    """Renders a clean, high-contrast KPI metric card."""
+    """Renders a clean, high-contrast KPI metric card with aligned flexbox header."""
     badge_html = ""
     if badge_text:
-        badge_html = f"<span class='badge badge-{badge_type}' style='float:right;'>{badge_text}</span>"
+        badge_html = f"<span class='badge badge-{badge_type}'>{badge_text}</span>"
 
     subtext_html = ""
     if subtext:
-        subtext_html = f"<div class='kpi-subtext'>{subtext}</div>"
+        subtext_html = f"<div class='kpi-subtext' title='{subtext}'>{subtext}</div>"
 
     card_html = f"""
     <div class="kpi-card">
-        <div class="kpi-label">{label} {badge_html}</div>
-        <div class="kpi-value">{value}</div>
+        <div class="kpi-header">
+            <span class="kpi-label" title="{label}">{label}</span>
+            {badge_html}
+        </div>
+        <div class="kpi-value" title="{value}">{value}</div>
         {subtext_html}
     </div>
     """
