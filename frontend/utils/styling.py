@@ -54,7 +54,7 @@ def _sidebar_css() -> str:
 
     [data-testid="stSidebarContent"] {
         width: 280px !important;
-        padding: 16px !important;
+        padding: 16px 16px 14px 16px !important;
         background-color: #ffffff !important;
         display: flex !important;
         flex-direction: column !important;
@@ -62,6 +62,7 @@ def _sidebar_css() -> str:
         min-height: 100vh !important;
         gap: 0 !important;
         box-sizing: border-box !important;
+        position: relative !important;
     }
 
     /* All direct children default to order: 10 */
@@ -69,44 +70,19 @@ def _sidebar_css() -> str:
         order: 10 !important;
     }
 
-    /* 2. Top Header & Collapse Button (Order: 1) */
-    [data-testid="stSidebarContent"] > [data-testid="stSidebarHeader"],
-    [data-testid="stSidebarHeader"] {
-        order: 1 !important;
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        justify-content: flex-end !important;
-        align-items: center !important;
-        padding: 0 0 10px 0 !important;
-        min-height: 36px !important;
-        background: transparent !important;
-    }
-
-    [data-testid="stSidebarHeader"] div,
-    [data-testid="stSidebarCollapseButton"] {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: flex !important;
-    }
-
-    [data-testid="stLogoSpacer"] {
-        display: none !important;
-        width: 0 !important;
-        height: 0 !important;
-    }
-
-    /* Unbox User Content container so brand card & footer position seamlessly */
-    [data-testid="stSidebarContent"] > [data-testid="stSidebarUserContent"],
-    [data-testid="stSidebarUserContent"] {
+    /* Unbox User Content container and inner wrappers so brand card & footer position seamlessly */
+    [data-testid="stSidebarUserContent"],
+    [data-testid="stSidebarUserContent"] > div,
+    [data-testid="stSidebarUserContent"] [data-testid="stVerticalBlock"]:not([class*="st-key-"]),
+    [data-testid="stSidebarUserContent"] [data-testid="stLayoutWrapper"] {
         display: contents !important;
     }
 
-    /* 3. Brand Card (Order: 2) */
+    /* 2. Brand Card (Order: 1 - Top of sidebar) */
     .st-key-sidebar-brand {
-        order: 2 !important;
+        order: 1 !important;
         width: 100% !important;
-        margin-bottom: 2px !important;
+        margin-bottom: 6px !important;
     }
 
     .sidebar-brand-card {
@@ -210,13 +186,18 @@ def _sidebar_css() -> str:
         }
     }
 
-    /* 4. Platform Navigation Section Header & Links (Order: 3) */
+    /* 3. Platform Navigation Section Header & Links (Order: 2 - Center of sidebar) */
     [data-testid="stSidebarNav"],
     [data-testid="stSidebarContent"] > div:has([data-testid="stSidebarNav"]) {
-        order: 3 !important;
+        order: 2 !important;
         width: 100% !important;
+        flex: 1 1 auto !important;
         padding: 0 !important;
         margin: 0 !important;
+    }
+
+    [data-testid="stSidebarNavSeparator"] {
+        display: none !important;
     }
 
     [data-testid="stSidebarNav"]::before {
@@ -308,87 +289,160 @@ def _sidebar_css() -> str:
         font-weight: 600 !important;
     }
 
-    /* 5. Pinned Sidebar Footer (Order: 100) */
+    /* 4. Pinned Sidebar Footer (Order: 100) */
     .st-key-sidebar-footer {
         order: 100 !important;
+        flex: 0 0 auto !important;
+        flex-grow: 0 !important;
+        flex-shrink: 0 !important;
         margin-top: auto !important;
         width: 100% !important;
+        padding-top: 12px !important;
+        padding-bottom: 2px !important;
+        border-top: 1px solid #e2e8f0 !important;
+        position: relative !important;
+        background: #ffffff !important;
     }
 
     .sidebar-footer-card {
         width: 100% !important;
-        margin-top: auto !important;
-        padding-top: 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding-right: 36px !important;
         box-sizing: border-box !important;
     }
 
     .sidebar-footer-divider {
-        height: 1px !important;
-        background: #e2e8f0 !important;
-        margin-bottom: 10px !important;
-        border: none !important;
+        display: none !important;
     }
 
     .sidebar-footer-meta {
         display: flex !important;
         flex-direction: column !important;
         gap: 3px !important;
-        padding: 0 4px !important;
+        padding: 0 !important;
+        min-width: 0 !important;
+    }
+
+    .sidebar-footer-version-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
     }
 
     .sidebar-footer-version {
-        font-size: 11px !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-size: 11.5px !important;
         font-weight: 600 !important;
-        color: #64748b !important;
-        line-height: 1.3 !important;
+        color: #475569 !important;
+        line-height: 1.2 !important;
+    }
+
+    .sidebar-footer-tag {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-size: 10px !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+        background-color: #f1f5f9 !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 4px !important;
+        padding: 1px 6px !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0.02em !important;
     }
 
     .sidebar-footer-copy {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
         font-size: 11px !important;
         font-weight: 400 !important;
         color: #94a3b8 !important;
-        line-height: 1.3 !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
     }
 
-    /* 6. Expand & Collapse Toggle Buttons */
-    [data-testid="stExpandSidebarButton"],
-    [data-testid="stExpandSidebarButton"] button,
-    button[aria-label="Expand sidebar"] {
+    /* 5. Integrated Collapse & Expand Buttons */
+    /* Collapse button anchored to bottom right of sidebar in the footer row */
+    [data-testid="stSidebarContent"] > [data-testid="stSidebarHeader"],
+    [data-testid="stSidebarHeader"] {
+        position: absolute !important;
+        bottom: 11px !important;
+        right: 16px !important;
+        top: auto !important;
+        left: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        min-height: unset !important;
+        height: 30px !important;
+        width: 30px !important;
+        z-index: 10 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: transparent !important;
+        order: 101 !important;
+    }
+
+    [data-testid="stSidebarHeader"] div,
+    [data-testid="stSidebarCollapseButton"] {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: flex !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    [data-testid="stLogoSpacer"] {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapseButton"] button,
+    button[aria-label="Collapse sidebar"] {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         pointer-events: auto !important;
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
+        border-radius: 7px !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        min-height: 28px !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12) !important;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
         cursor: pointer !important;
-        position: fixed !important;
-        top: 14px !important;
-        left: 14px !important;
-        z-index: 9999999 !important;
+        position: relative !important;
         padding: 0 !important;
         margin: 0 !important;
-        transition: all 0.15s ease !important;
+        transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
-    [data-testid="stExpandSidebarButton"]:hover,
-    [data-testid="stExpandSidebarButton"] button:hover,
-    button[aria-label="Expand sidebar"]:hover {
+    [data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    button[aria-label="Collapse sidebar"]:hover {
         background-color: #eff6ff !important;
-        border-color: #2563eb !important;
-        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
+        border-color: #93c5fd !important;
+        box-shadow: 0 1px 4px rgba(37, 99, 235, 0.15) !important;
     }
 
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapseButton"] button,
-    button[aria-label="Collapse sidebar"] {
+    [data-testid="stSidebarCollapseButton"] button:focus-visible,
+    button[aria-label="Collapse sidebar"]:focus-visible,
+    [data-testid="stExpandSidebarButton"] button:focus-visible,
+    button[aria-label="Expand sidebar"]:focus-visible {
+        outline: 2px solid #2563eb !important;
+        outline-offset: 2px !important;
+    }
+
+    /* Expand button: floating at top-left when sidebar is collapsed */
+    [data-testid="stExpandSidebarButton"],
+    [data-testid="stExpandSidebarButton"] button,
+    button[aria-label="Expand sidebar"] {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -402,17 +456,20 @@ def _sidebar_css() -> str:
         min-height: 32px !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1) !important;
         cursor: pointer !important;
-        position: relative !important;
+        position: fixed !important;
+        top: 14px !important;
+        left: 14px !important;
+        z-index: 9999999 !important;
         padding: 0 !important;
         margin: 0 !important;
         transition: all 0.15s ease !important;
     }
 
-    [data-testid="stSidebarCollapseButton"]:hover,
-    [data-testid="stSidebarCollapseButton"] button:hover,
-    button[aria-label="Collapse sidebar"]:hover {
+    [data-testid="stExpandSidebarButton"]:hover,
+    [data-testid="stExpandSidebarButton"] button:hover,
+    button[aria-label="Expand sidebar"]:hover {
         background-color: #eff6ff !important;
         border-color: #2563eb !important;
         box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
@@ -443,47 +500,50 @@ def _sidebar_css() -> str:
         content: none !important;
     }
 
-    [data-testid="stExpandSidebarButton"] button::after,
-    button[aria-label="Expand sidebar"]::after {
-        content: "»" !important;
-        font-size: 24px !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-weight: 800 !important;
-        color: #1e293b !important;
-        line-height: 1 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+    /* Crisp SVG Vector Icon for Collapse button (chevron pointing left) */
+    [data-testid="stSidebarCollapseButton"] button::after,
+    button[aria-label="Collapse sidebar"]::after {
+        content: "" !important;
+        width: 14px !important;
+        height: 14px !important;
+        display: block !important;
+        background-color: #475569 !important;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 18 9 12 15 6'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain !important;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 18 9 12 15 6'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain !important;
         position: absolute !important;
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
+        transition: all 0.15s ease !important;
         pointer-events: none !important;
     }
 
-    [data-testid="stSidebarCollapseButton"] button::after,
-    button[aria-label="Collapse sidebar"]::after {
-        content: "«" !important;
-        font-size: 20px !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-weight: 800 !important;
-        color: #1e293b !important;
-        line-height: 1 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+    [data-testid="stSidebarCollapseButton"]:hover button::after,
+    button[aria-label="Collapse sidebar"]:hover::after {
+        background-color: #2563eb !important;
+    }
+
+    /* Crisp SVG Vector Icon for Expand button (chevron pointing right) */
+    [data-testid="stExpandSidebarButton"] button::after,
+    button[aria-label="Expand sidebar"]::after {
+        content: "" !important;
+        width: 14px !important;
+        height: 14px !important;
+        display: block !important;
+        background-color: #475569 !important;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain !important;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E") no-repeat center / contain !important;
         position: absolute !important;
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
+        transition: all 0.15s ease !important;
         pointer-events: none !important;
     }
 
     [data-testid="stExpandSidebarButton"]:hover button::after,
-    button[aria-label="Expand sidebar"]:hover::after,
-    [data-testid="stSidebarCollapseButton"]:hover button::after,
-    button[aria-label="Collapse sidebar"]:hover::after {
-        color: #2563eb !important;
+    button[aria-label="Expand sidebar"]:hover::after {
+        background-color: #2563eb !important;
     }
 
     /* 7. Accessibility - Reduced Motion */
@@ -1139,11 +1199,15 @@ def render_sidebar_footer():
     st.session_state["_sidebar_footer_rendered"] = True
 
     footer_html = """
-    <div class="sidebar-footer-card">
-        <div class="sidebar-footer-divider"></div>
-        <div class="sidebar-footer-meta">
-            <div class="sidebar-footer-version">v1.0.0 &bull; Enterprise ML</div>
-            <div class="sidebar-footer-copy">&copy; BankerEye</div>
+    <div class="sidebar-footer-card" id="sidebar-footer-card">
+        <div class="sidebar-footer-content">
+            <div class="sidebar-footer-meta">
+                <div class="sidebar-footer-version-row">
+                    <span class="sidebar-footer-version">v1.0.0</span>
+                    <span class="sidebar-footer-tag">Enterprise ML</span>
+                </div>
+                <div class="sidebar-footer-copy">&copy; BankerEye</div>
+            </div>
         </div>
     </div>
     """
