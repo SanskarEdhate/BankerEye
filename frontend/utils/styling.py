@@ -426,43 +426,88 @@ def apply_custom_css():
         position: relative;
     }
 
-    /* Hub Navigation Cards */
-    .nav-card {
+    /* Hub Navigation Cards (Unified inside bordered container) */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
-        border-radius: 12px !important;
-        padding: 20px 22px !important;
-        height: 100% !important;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+        border-radius: 14px !important;
+        padding: 18px 20px 16px 20px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
+        height: 100% !important;
     }
 
-    .nav-card:hover {
+    div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         transform: translateY(-3px) !important;
         border-color: #93c5fd !important;
         box-shadow: 0 12px 24px -4px rgba(37, 99, 235, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.03) !important;
     }
 
-    .nav-icon {
-        font-size: 26px !important;
-        margin-bottom: 10px !important;
+    .nav-card-inner {
+        flex-grow: 1 !important;
     }
 
-    .nav-title {
+    .nav-icon-badge {
+        font-size: 26px !important;
+        line-height: 1 !important;
+        width: 44px !important;
+        height: 44px !important;
+        border-radius: 10px !important;
+        background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%) !important;
+        border: 1px solid #dbeafe !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-bottom: 12px !important;
+        box-shadow: 0 1px 3px rgba(37, 99, 235, 0.05) !important;
+    }
+
+    .nav-card-title {
         font-size: 16px !important;
         font-weight: 700 !important;
         color: #0f172a !important;
         margin-bottom: 6px !important;
+        letter-spacing: -0.01em !important;
     }
 
-    .nav-desc {
+    .nav-card-desc {
         font-size: 13px !important;
         color: #64748b !important;
-        line-height: 1.5 !important;
-        margin-bottom: 14px !important;
+        line-height: 1.55 !important;
+        min-height: 42px !important;
+        margin-bottom: 12px !important;
+    }
+
+    /* Embedded Page Link Button inside the Card */
+    div[data-testid="stVerticalBlockBorderWrapper"] [data-testid="stPageLink-NavLink"] a {
+        background-color: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 9px 14px !important;
+        color: #1e3a8a !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.18s ease-in-out !important;
+        text-decoration: none !important;
+        width: 100% !important;
+    }
+
+    div[data-testid="stVerticalBlockBorderWrapper"] [data-testid="stPageLink-NavLink"] a:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        border-color: #1d4ed8 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    div[data-testid="stVerticalBlockBorderWrapper"] [data-testid="stPageLink-NavLink"] a:hover * {
+        color: #ffffff !important;
     }
 
     /* Badges */

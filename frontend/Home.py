@@ -87,102 +87,88 @@ st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("### 🧭 System Navigation & Functional Modules")
 st.caption("Select any module below or use the sidebar navigation to explore BankerEye ML.")
 
-# 6 Clean Navigation Cards in a 3x2 Grid
-nav_r1_c1, nav_r1_c2, nav_r1_c3 = st.columns(3)
+# 6 Clean, Unified Navigation Cards in a 3x2 Grid
+nav_modules = [
+    {
+        "icon": "📊",
+        "title": "1. Dashboard",
+        "desc": "Executive KPI metrics, conversion donut charts, and model training status.",
+        "page": "pages/1_Dashboard.py",
+        "label": "Open Executive Dashboard →",
+    },
+    {
+        "icon": "🔍",
+        "title": "2. Dataset Explorer",
+        "desc": "Organized dataset folders, feature schemas, missing values, and EDA distributions.",
+        "page": "pages/2_Dataset_Explorer.py",
+        "label": "Explore Dataset & Catalog →",
+    },
+    {
+        "icon": "⚖️",
+        "title": "3. Model Comparison",
+        "desc": "Side-by-side metric rankings, ROC curves, confusion matrices, and feature importance.",
+        "page": "pages/3_Model_Comparison.py",
+        "label": "Compare 4 Classifiers →",
+    },
+    {
+        "icon": "🎯",
+        "title": "4. Subscription Predictor",
+        "desc": "Customer profiling form with 4-model consensus scoring and propensity gauges.",
+        "page": "pages/4_Subscription_Predictor.py",
+        "label": "Predict Customer Conversion →",
+    },
+    {
+        "icon": "📁",
+        "title": "5. Batch Prediction",
+        "desc": "Upload bulk marketing CSV lead lists, perform batch scoring, and export CSV results.",
+        "page": "pages/5_Batch_Prediction.py",
+        "label": "Launch Batch Scoring →",
+    },
+    {
+        "icon": "📑",
+        "title": "6. Reports & Insights",
+        "desc": "Academic findings, verified literature review papers, and downloadable PDF reports.",
+        "page": "pages/6_Reports_and_Insights.py",
+        "label": "View Academic Reports →",
+    },
+]
 
-with nav_r1_c1:
-    st.markdown(
-        """
-        <div class="nav-card">
-            <div>
-                <div class="nav-icon">📊</div>
-                <div class="nav-title">1. Dashboard</div>
-                <div class="nav-desc">Executive KPI metrics, conversion donut charts, and model training status.</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.page_link("pages/1_Dashboard.py", label="Open Executive Dashboard →", icon="📊", use_container_width=True)
+# Row 1
+r1_cols = st.columns(3)
+for col, mod in zip(r1_cols, nav_modules[:3]):
+    with col:
+        with st.container(border=True):
+            st.markdown(
+                f"""
+                <div class="nav-card-inner">
+                    <div class="nav-icon-badge">{mod['icon']}</div>
+                    <div class="nav-card-title">{mod['title']}</div>
+                    <div class="nav-card-desc">{mod['desc']}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.page_link(mod["page"], label=mod["label"], width="stretch")
 
-with nav_r1_c2:
-    st.markdown(
-        """
-        <div class="nav-card">
-            <div>
-                <div class="nav-icon">🔍</div>
-                <div class="nav-title">2. Dataset Explorer</div>
-                <div class="nav-desc">Organized dataset folders, feature schemas, missing values, and EDA distributions.</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.page_link("pages/2_Dataset_Explorer.py", label="Explore Dataset & Catalog →", icon="🔍", use_container_width=True)
+st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-with nav_r1_c3:
-    st.markdown(
-        """
-        <div class="nav-card">
-            <div>
-                <div class="nav-icon">⚖️</div>
-                <div class="nav-title">3. Model Comparison</div>
-                <div class="nav-desc">Side-by-side metric rankings, ROC curves, confusion matrices, and feature importance.</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.page_link("pages/3_Model_Comparison.py", label="Compare 4 Classifiers →", icon="⚖️", use_container_width=True)
+# Row 2
+r2_cols = st.columns(3)
+for col, mod in zip(r2_cols, nav_modules[3:]):
+    with col:
+        with st.container(border=True):
+            st.markdown(
+                f"""
+                <div class="nav-card-inner">
+                    <div class="nav-icon-badge">{mod['icon']}</div>
+                    <div class="nav-card-title">{mod['title']}</div>
+                    <div class="nav-card-desc">{mod['desc']}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.page_link(mod["page"], label=mod["label"], width="stretch")
 
-st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
-nav_r2_c1, nav_r2_c2, nav_r2_c3 = st.columns(3)
-
-with nav_r2_c1:
-    st.markdown(
-        """
-        <div class="nav-card">
-            <div>
-                <div class="nav-icon">🎯</div>
-                <div class="nav-title">4. Subscription Predictor</div>
-                <div class="nav-desc">Customer profiling form with 4-model consensus scoring and propensity gauges.</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.page_link("pages/4_Subscription_Predictor.py", label="Predict Customer Conversion →", icon="🎯", use_container_width=True)
-
-with nav_r2_c2:
-    st.markdown(
-        """
-        <div class="nav-card">
-            <div>
-                <div class="nav-icon">📁</div>
-                <div class="nav-title">5. Batch Prediction</div>
-                <div class="nav-desc">Upload bulk marketing CSV lead lists, perform batch scoring, and export CSV results.</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.page_link("pages/5_Batch_Prediction.py", label="Launch Batch Scoring →", icon="📁", use_container_width=True)
-
-with nav_r2_c3:
-    st.markdown(
-        """
-        <div class="nav-card">
-            <div>
-                <div class="nav-icon">📑</div>
-                <div class="nav-title">6. Reports & Insights</div>
-                <div class="nav-desc">Academic findings, verified literature review papers, and downloadable PDF reports.</div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.page_link("pages/6_Reports_and_Insights.py", label="View Academic Reports →", icon="📑", use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
