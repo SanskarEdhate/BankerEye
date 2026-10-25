@@ -50,11 +50,19 @@ def apply_custom_css():
         display: flex !important;
     }
 
-    /* Hide only unwanted right-hand toolbar clutter: Deploy, Status, MainMenu, Decoration, Footer */
+    /* Hide only unwanted right-hand toolbar clutter: Deploy Button, Status, MainMenu, Decoration, Footer */
+    .stAppDeployButton,
+    .stAppDeployButton *,
     .stDeployButton,
+    .stDeployButton *,
+    [data-testid="stAppDeployButton"],
+    [data-testid="stAppDeployButton"] *,
+    [data-testid="stDeployButton"],
+    [data-testid="stDeployButton"] *,
     [data-testid="stDecoration"],
     #MainMenu,
     [data-testid="stToolbarActions"],
+    [data-testid="stToolbarActionButton"],
     [data-testid="stStatusWidget"],
     [data-testid="stMainMenu"],
     header .stActionButton,
@@ -65,6 +73,12 @@ def apply_custom_css():
         pointer-events: none !important;
         height: 0 !important;
         width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        overflow: hidden !important;
     }
 
     /* =========================================================================
