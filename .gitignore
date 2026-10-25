@@ -47,6 +47,3 @@ Thumbs.db
 *.tmp
 *.log
 scratch/
-backend/saved_models/*.joblib
-!backend/saved_models/model_metrics.json
-!backend/saved_models/evaluation_summary.json
