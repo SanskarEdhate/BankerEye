@@ -764,25 +764,33 @@ def _global_css() -> str:
         border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
-    /* Responsive KPI Row - Wrap to 2x2 grid when screen is narrow (e.g. devtools open, tablet) */
+    /* Responsive Metric & Model Row - Wrap to 2x2 grid when screen is narrow (e.g. devtools open, tablet) */
     div[data-testid="stHorizontalBlock"]:has(.kpi-card),
-    .stHorizontalBlock:has(.kpi-card) {
+    .stHorizontalBlock:has(.kpi-card),
+    div[data-testid="stHorizontalBlock"]:has(.model-card),
+    .stHorizontalBlock:has(.model-card) {
         flex-wrap: wrap !important;
         gap: 12px 10px !important;
     }
 
     div[data-testid="stHorizontalBlock"]:has(.kpi-card) > div[data-testid="stColumn"],
-    .stHorizontalBlock:has(.kpi-card) > .stColumn {
+    .stHorizontalBlock:has(.kpi-card) > .stColumn,
+    div[data-testid="stHorizontalBlock"]:has(.model-card) > div[data-testid="stColumn"],
+    .stHorizontalBlock:has(.model-card) > .stColumn {
         min-width: 190px !important;
     }
 
     @media (max-width: 1250px) {
         div[data-testid="stHorizontalBlock"]:has(.kpi-card),
-        .stHorizontalBlock:has(.kpi-card) {
+        .stHorizontalBlock:has(.kpi-card),
+        div[data-testid="stHorizontalBlock"]:has(.model-card),
+        .stHorizontalBlock:has(.model-card) {
             flex-wrap: wrap !important;
         }
         div[data-testid="stHorizontalBlock"]:has(.kpi-card) > div[data-testid="stColumn"],
-        .stHorizontalBlock:has(.kpi-card) > .stColumn {
+        .stHorizontalBlock:has(.kpi-card) > .stColumn,
+        div[data-testid="stHorizontalBlock"]:has(.model-card) > div[data-testid="stColumn"],
+        .stHorizontalBlock:has(.model-card) > .stColumn {
             width: calc(50% - 10px) !important;
             min-width: calc(50% - 10px) !important;
             max-width: calc(50% - 10px) !important;
@@ -792,9 +800,24 @@ def _global_css() -> str:
 
     @media (max-width: 640px) {
         div[data-testid="stHorizontalBlock"]:has(.kpi-card) > div[data-testid="stColumn"],
-        .stHorizontalBlock:has(.kpi-card) > .stColumn {
+        .stHorizontalBlock:has(.kpi-card) > .stColumn,
+        div[data-testid="stHorizontalBlock"]:has(.model-card) > div[data-testid="stColumn"],
+        .stHorizontalBlock:has(.model-card) > .stColumn {
             width: 100% !important;
             min-width: 100% !important;
+            max-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+    }
+
+    /* Responsive Model Ranking Selector + Banner */
+    @media (max-width: 950px) {
+        div[data-testid="stHorizontalBlock"]:has([data-baseweb="select"]) {
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has([data-baseweb="select"]) > div[data-testid="stColumn"] {
+            width: 100% !important;
             max-width: 100% !important;
             flex: 1 1 100% !important;
         }
@@ -895,6 +918,23 @@ def _global_css() -> str:
         border: 2px solid #2563eb !important;
         background: #f8fafc !important;
         position: relative;
+    }
+
+    .model-header {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        margin-bottom: 6px !important;
+        min-height: 38px !important;
+    }
+
+    .model-title {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        line-height: 1.25 !important;
+        flex: 1 1 auto !important;
     }
 
     /* Hub Navigation Cards (Unified inside bordered container) */

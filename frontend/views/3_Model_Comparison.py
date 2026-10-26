@@ -1,5 +1,6 @@
 import sys
 import time
+import textwrap
 from pathlib import Path
 import pandas as pd
 import streamlit as st
@@ -98,7 +99,7 @@ if verdict_text:
     )
 
 # Metric Ranking Selector
-col_sel, col_info = st.columns([1, 2.5])
+col_sel, col_info = st.columns([1.3, 2.0])
 with col_sel:
     rank_metric = st.selectbox(
         "Rank Models By Primary Metric:",
@@ -119,7 +120,7 @@ with col_info:
     best_score = best_entry.get("value", 0.0)
     st.markdown(
         f"""
-        <div style="padding: 10px 14px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe; font-size: 13px;">
+        <div style="padding: 10px 14px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe; font-size: 13px; margin-top: 24px;">
             🏆 <strong>Top Ranked Model ({rank_metric.upper()}):</strong> 
             <span style="font-weight:700; color:#1e3a8a;">{best_model_name}</span> 
             with a score of <strong>{best_score:.2%}</strong>
@@ -141,41 +142,42 @@ for idx, m_key in enumerate(model_keys):
     is_best = (m_data.get("display_name") == best_model_name)
 
     card_class = "model-card model-card-best" if is_best else "model-card"
-    best_badge = "<span class='badge badge-success' style='float:right;'>Top Rank</span>" if is_best else ""
+    best_badge = "<span class='badge badge-success'>Top Rank</span>" if is_best else ""
 
     with m_cols[idx]:
-        st.markdown(
-            f"""
-            <div class="{card_class}">
-                <div class="model-title">{m_data.get('display_name', m_key)} {best_badge}</div>
-                <div style="font-size: 11px; color: #64748b; min-height: 38px; margin-bottom: 12px;">{m_data.get('description', '')}</div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0; font-size: 13px;">
-                    <span style="color:#64748b;">Accuracy</span>
-                    <strong>{m_metrics.get('accuracy', 0):.2%}</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0; font-size: 13px;">
-                    <span style="color:#64748b;">Precision</span>
-                    <strong>{m_metrics.get('precision', 0):.2%}</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0; font-size: 13px;">
-                    <span style="color:#64748b;">Recall</span>
-                    <strong>{m_metrics.get('recall', 0):.2%}</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0; font-size: 13px;">
-                    <span style="color:#64748b;">F1-Score</span>
-                    <strong style="color: #2563eb;">{m_metrics.get('f1_score', 0):.2%}</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px;">
-                    <span style="color:#64748b;">ROC-AUC</span>
-                    <strong style="color: #047857;">{m_metrics.get('roc_auc', 0):.2%}</strong>
-                </div>
-                <div style="font-size: 11px; color: #94a3b8; margin-top: 8px;">
-                    ⏱ Train: {m_time.get('training_time_sec', 0):.2f}s | Latency: {m_time.get('prediction_time_sec', 0)*1000:.1f}ms
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        card_content = (
+            f'<div class="{card_class}">'
+            f'<div class="model-header">'
+            f'<span class="model-title">{m_data.get("display_name", m_key)}</span>'
+            f'{best_badge}'
+            f'</div>'
+            f'<div style="font-size: 11px; color: #64748b; min-height: 38px; margin-bottom: 12px; line-height: 1.35;">{m_data.get("description", "")}</div>'
+            f'<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0; font-size: 13px;">'
+            f'<span style="color:#64748b;">Accuracy</span>'
+            f'<strong>{m_metrics.get("accuracy", 0):.2%}</strong>'
+            f'</div>'
+            f'<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0; font-size: 13px;">'
+            f'<span style="color:#64748b;">Precision</span>'
+            f'<strong>{m_metrics.get("precision", 0):.2%}</strong>'
+            f'</div>'
+            f'<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0; font-size: 13px;">'
+            f'<span style="color:#64748b;">Recall</span>'
+            f'<strong>{m_metrics.get("recall", 0):.2%}</strong>'
+            f'</div>'
+            f'<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0; font-size: 13px;">'
+            f'<span style="color:#64748b;">F1-Score</span>'
+            f'<strong style="color: #2563eb;">{m_metrics.get("f1_score", 0):.2%}</strong>'
+            f'</div>'
+            f'<div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px;">'
+            f'<span style="color:#64748b;">ROC-AUC</span>'
+            f'<strong style="color: #047857;">{m_metrics.get("roc_auc", 0):.2%}</strong>'
+            f'</div>'
+            f'<div style="font-size: 11px; color: #94a3b8; margin-top: 8px;">'
+            f'⏱ Train: {m_time.get("training_time_sec", 0):.2f}s | Latency: {m_time.get("prediction_time_sec", 0)*1000:.1f}ms'
+            f'</div>'
+            f'</div>'
         )
+        st.markdown(card_content, unsafe_allow_html=True)
 
 # Detailed Visualizations Tabs
 tab_charts, tab_roc, tab_cm, tab_imp, tab_ci, tab_temporal, tab_table = st.tabs(
