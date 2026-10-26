@@ -764,16 +764,51 @@ def _global_css() -> str:
         border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
-    /* KPI Cards (Clean White with Soft Elevation & Perfect Alignment) */
+    /* Responsive KPI Row - Wrap to 2x2 grid when screen is narrow (e.g. devtools open, tablet) */
+    div[data-testid="stHorizontalBlock"]:has(.kpi-card),
+    .stHorizontalBlock:has(.kpi-card) {
+        flex-wrap: wrap !important;
+        gap: 12px 10px !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.kpi-card) > div[data-testid="stColumn"],
+    .stHorizontalBlock:has(.kpi-card) > .stColumn {
+        min-width: 190px !important;
+    }
+
+    @media (max-width: 1250px) {
+        div[data-testid="stHorizontalBlock"]:has(.kpi-card),
+        .stHorizontalBlock:has(.kpi-card) {
+            flex-wrap: wrap !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.kpi-card) > div[data-testid="stColumn"],
+        .stHorizontalBlock:has(.kpi-card) > .stColumn {
+            width: calc(50% - 10px) !important;
+            min-width: calc(50% - 10px) !important;
+            max-width: calc(50% - 10px) !important;
+            flex: 1 1 calc(50% - 10px) !important;
+        }
+    }
+
+    @media (max-width: 640px) {
+        div[data-testid="stHorizontalBlock"]:has(.kpi-card) > div[data-testid="stColumn"],
+        .stHorizontalBlock:has(.kpi-card) > .stColumn {
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+    }
+
     .kpi-card {
         background: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 12px !important;
-        padding: 14px 15px !important;
-        margin-bottom: 12px !important;
-        height: 122px !important;
-        min-height: 122px !important;
-        max-height: 122px !important;
+        padding: 12px 14px !important;
+        margin-bottom: 8px !important;
+        height: 120px !important;
+        min-height: 120px !important;
+        max-height: 120px !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
@@ -793,7 +828,7 @@ def _global_css() -> str:
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
-        gap: 6px !important;
+        gap: 4px !important;
         width: 100% !important;
         margin: 0 !important;
         min-height: 22px !important;
@@ -817,7 +852,7 @@ def _global_css() -> str:
 
     .kpi-value {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        font-size: 24px !important;
+        font-size: 22px !important;
         font-weight: 800 !important;
         color: #0f172a !important;
         line-height: 1.15 !important;
@@ -830,7 +865,7 @@ def _global_css() -> str:
     }
 
     .kpi-subtext {
-        font-size: 11.5px !important;
+        font-size: 11px !important;
         font-weight: 500 !important;
         color: #64748b !important;
         line-height: 1.25 !important;

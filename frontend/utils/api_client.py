@@ -7,25 +7,48 @@ import streamlit as st
 
 logger = logging.getLogger(__name__)
 
+_RESOLVED_BASE_URL: Optional[str] = None
+
+
 def get_base_url() -> str:
-    """Dynamically resolves the backend API URL from st.secrets or environment variables.
-    
-    Supports both BACKEND_API_URL and STREAMLIT_API_BASE_URL keys.
-    """
+    """Dynamically resolves the backend API URL from st.secrets, env vars, or production Render."""
+    global _RESOLVED_BASE_URL
+    if _RESOLVED_BASE_URL:
+        return _RESOLVED_BASE_URL
+
+    # 1. Streamlit Secrets (highest priority for cloud deployments)
     try:
         if hasattr(st, "secrets"):
             for key in ("BACKEND_API_URL", "STREAMLIT_API_BASE_URL", "backend_api_url", "streamlit_api_base_url"):
                 if key in st.secrets:
                     val = str(st.secrets[key]).strip().rstrip("/")
                     if val:
-                        return val
+                        _RESOLVED_BASE_URL = val
+                        return _RESOLVED_BASE_URL
     except Exception:
         pass
+
+    # 2. Environment Variables
     for key in ("BACKEND_API_URL", "STREAMLIT_API_BASE_URL"):
         val = os.getenv(key)
         if val:
-            return val.strip().rstrip("/")
-    return "http://127.0.0.1:5000"
+            _RESOLVED_BASE_URL = val.strip().rstrip("/")
+            return _RESOLVED_BASE_URL
+
+    # 3. Check if local backend is active on port 5000 (for local development)
+    try:
+        import socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.2)
+            if s.connect_ex(("127.0.0.1", 5000)) == 0:
+                _RESOLVED_BASE_URL = "http://127.0.0.1:5000"
+                return _RESOLVED_BASE_URL
+    except Exception:
+        pass
+
+    # 4. Default to deployed production backend on Render
+    _RESOLVED_BASE_URL = "https://bankereye-1.onrender.com"
+    return _RESOLVED_BASE_URL
 
 
 API_BASE_URL = get_base_url()
@@ -92,15 +115,37 @@ def check_api_health(retries: int = 1) -> Dict[str, Any]:
 
 @st.cache_data(ttl=60)
 def get_dataset_summary() -> Optional[Dict[str, Any]]:
-    """Retrieves dataset summary from the Flask API (cached for 60s)."""
+    """Retrieves dataset summary from the Flask API (cached for 60s), with local canonical fallback."""
     try:
         res = requests.get(f"{get_base_url()}/api/dataset/summary", timeout=DEFAULT_TIMEOUT)
         if res.status_code == 200:
             return res.json()
-        return None
     except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to fetch dataset summary: {e}")
-        return None
+        logger.warning(f"Live API dataset summary unavailable: {e}. Using benchmark canonical metadata.")
+
+    # Graceful fallback: Load benchmark dataset summary if backend is cold-starting
+    try:
+        from pathlib import Path
+        import json
+        summary_path = Path(__file__).resolve().parent.parent.parent / "dataset" / "Data Cleaning & Splitting" / "1_uci_bank_marketing_canonical" / "data_summary.json"
+        if summary_path.exists():
+            with open(summary_path, "r", encoding="utf-8") as f:
+                raw_s = json.load(f)
+            return {
+                "total_rows": raw_s.get("cleaned_record_count", 45211),
+                "total_columns": raw_s.get("cleaned_column_count", 17),
+                "total_missing_cells": raw_s.get("missing_value_count", 0),
+                "duplicate_rows": raw_s.get("duplicate_count", 0),
+                "target_distribution": {
+                    "no": {"count": 39922, "percentage": 88.3},
+                    "yes": {"count": 5289, "percentage": 11.7},
+                },
+                "is_fallback": True,
+            }
+    except Exception as ex:
+        logger.error(f"Local summary fallback failed: {ex}")
+
+    return None
 
 
 @st.cache_data(ttl=60)
@@ -165,20 +210,35 @@ def get_training_status() -> Dict[str, Any]:
 
 def clear_all_api_caches():
     """Clears all Streamlit cached data across the app after training finishes."""
+    global _RESOLVED_BASE_URL
+    _RESOLVED_BASE_URL = None
     st.cache_data.clear()
 
 
 @st.cache_data(ttl=60)
 def get_model_comparison() -> Optional[Dict[str, Any]]:
-    """Retrieves model metrics and comparison data (cached for 60s)."""
+    """Retrieves model metrics and comparison data (cached for 60s), with local fallback."""
     try:
         res = requests.get(f"{get_base_url()}/api/models/compare", timeout=DEFAULT_TIMEOUT)
         if res.status_code == 200:
             return res.json()
-        return None
     except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to fetch model comparison: {e}")
-        return None
+        logger.warning(f"Live API model comparison unavailable: {e}. Using saved benchmark models.")
+
+    # Graceful fallback: Load saved evaluation_summary.json if backend is cold-starting
+    try:
+        from pathlib import Path
+        import json
+        eval_path = Path(__file__).resolve().parent.parent.parent / "backend" / "saved_models" / "evaluation_summary.json"
+        if eval_path.exists():
+            with open(eval_path, "r", encoding="utf-8") as f:
+                raw_eval = json.load(f)
+            raw_eval["is_fallback"] = True
+            return raw_eval
+    except Exception as ex:
+        logger.error(f"Local model comparison fallback failed: {ex}")
+
+    return None
 
 
 @st.cache_data(ttl=60)
