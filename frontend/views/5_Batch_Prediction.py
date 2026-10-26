@@ -42,12 +42,12 @@ render_info_banner(
     title="Batch CSV Format"
 )
 
-# Downloadable Sample Template
-col_up, col_template = st.columns([1.8, 1.2])
+# Downloadable Sample Template & Batch Uploader
+col_up, col_template = st.columns([1.2, 1.0])
 
 with col_template:
-    st.markdown("##### Need a Test CSV?")
-    st.caption("First 25 pre-campaign rows")
+    st.markdown("##### 📥 Benchmark Test CSV")
+    st.caption("Pre-formatted 25 customer test records")
     sample_records = get_dataset_sample(limit=25)
     if sample_records:
         df_sample_template = pd.DataFrame(sample_records)
@@ -55,7 +55,7 @@ with col_template:
         cols_to_keep = [c for c in df_sample_template.columns if c not in ["y", "duration"]]
         template_csv = df_sample_template[cols_to_keep].to_csv(index=False)
         st.download_button(
-            label="📥 Download Sample CSV",
+            label="Download Sample CSV",
             data=template_csv,
             file_name="sample_batch_customers.csv",
             mime="text/csv",

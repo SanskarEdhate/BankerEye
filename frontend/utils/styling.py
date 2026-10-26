@@ -824,25 +824,34 @@ def _global_css() -> str:
         }
     }
 
-    /* Responsive Form Inputs: Wrap 4-column form rows into 2x2 grid on medium screens, 1 col on mobile */
-    div[data-testid="stForm"] div[data-testid="stHorizontalBlock"],
-    div[data-testid="stForm"] .stHorizontalBlock {
-        flex-wrap: wrap !important;
-        gap: 12px 10px !important;
+    /* Button Typography & Text Truncation Prevention */
+    [data-testid="stDownloadButton"] button,
+    [data-testid="stDownloadButton"] button p,
+    .stButton > button,
+    .stButton > button p,
+    button[kind="primary"],
+    button[kind="secondary"] {
+        white-space: normal !important;
+        word-break: normal !important;
+        text-overflow: clip !important;
+        overflow: visible !important;
+        line-height: 1.3 !important;
+        font-size: 13.5px !important;
+        min-height: 42px !important;
+        height: auto !important;
+        padding: 8px 14px !important;
     }
 
-    div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
-    div[data-testid="stForm"] .stHorizontalBlock > .stColumn {
-        min-width: 175px !important;
+    /* Responsive Form Inputs: Clean 2-column or 1-column layout on medium/small viewports */
+    [data-testid="stForm"] [data-testid="stHorizontalBlock"],
+    .stForm .stHorizontalBlock {
+        flex-wrap: wrap !important;
+        gap: 12px 14px !important;
     }
 
     @media (max-width: 1250px) {
-        div[data-testid="stForm"] div[data-testid="stHorizontalBlock"],
-        div[data-testid="stForm"] .stHorizontalBlock {
-            flex-wrap: wrap !important;
-        }
-        div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
-        div[data-testid="stForm"] .stHorizontalBlock > .stColumn {
+        [data-testid="stForm"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+        [data-testid="stForm"] .stHorizontalBlock > .stColumn {
             width: calc(50% - 10px) !important;
             min-width: calc(50% - 10px) !important;
             max-width: calc(50% - 10px) !important;
@@ -851,8 +860,8 @@ def _global_css() -> str:
     }
 
     @media (max-width: 640px) {
-        div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
-        div[data-testid="stForm"] .stHorizontalBlock > .stColumn {
+        [data-testid="stForm"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"],
+        [data-testid="stForm"] .stHorizontalBlock > .stColumn {
             width: 100% !important;
             min-width: 100% !important;
             max-width: 100% !important;
@@ -861,13 +870,13 @@ def _global_css() -> str:
     }
 
     /* Responsive Batch Upload Row */
-    @media (max-width: 950px) {
-        div[data-testid="stHorizontalBlock"]:has(div[data-testid="stFileUploader"]) {
+    @media (max-width: 1150px) {
+        [data-testid="stHorizontalBlock"]:has([data-testid="stFileUploader"]) {
             flex-direction: column !important;
             gap: 16px !important;
         }
-        div[data-testid="stHorizontalBlock"]:has(div[data-testid="stFileUploader"]) > div[data-testid="stColumn"],
-        div[data-testid="stHorizontalBlock"]:has(div[data-testid="stFileUploader"]) > .stColumn {
+        [data-testid="stHorizontalBlock"]:has([data-testid="stFileUploader"]) > [data-testid="stColumn"],
+        [data-testid="stHorizontalBlock"]:has([data-testid="stFileUploader"]) > .stColumn {
             width: 100% !important;
             max-width: 100% !important;
             flex: 1 1 100% !important;
@@ -875,13 +884,13 @@ def _global_css() -> str:
     }
 
     /* Responsive Download Buttons (Reports & Artifacts) */
-    @media (max-width: 950px) {
-        div[data-testid="stHorizontalBlock"]:has(button[data-testid*="downloadButton"], button[kind="primary"]) {
+    @media (max-width: 1150px) {
+        [data-testid="stHorizontalBlock"]:has([data-testid="stDownloadButton"]) {
             flex-direction: column !important;
-            gap: 10px !important;
+            gap: 12px !important;
         }
-        div[data-testid="stHorizontalBlock"]:has(button[data-testid*="downloadButton"], button[kind="primary"]) > div[data-testid="stColumn"],
-        div[data-testid="stHorizontalBlock"]:has(button[data-testid*="downloadButton"], button[kind="primary"]) > .stColumn {
+        [data-testid="stHorizontalBlock"]:has([data-testid="stDownloadButton"]) > [data-testid="stColumn"],
+        [data-testid="stHorizontalBlock"]:has([data-testid="stDownloadButton"]) > .stColumn {
             width: 100% !important;
             max-width: 100% !important;
             flex: 1 1 100% !important;

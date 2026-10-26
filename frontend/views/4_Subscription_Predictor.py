@@ -79,48 +79,57 @@ def get_default_index(options, target):
 # Prediction Form
 with st.form("prediction_form"):
     st.markdown("#### 1. Customer Demographics")
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2 = st.columns(2)
     with c1:
         age = st.number_input("Age (years):", min_value=18, max_value=95, value=38, step=1)
     with c2:
         job = st.selectbox("Job Type:", options=job_options, index=get_default_index(job_options, "blue-collar"))
+
+    c3, c4 = st.columns(2)
     with c3:
         marital = st.selectbox("Marital Status:", options=marital_options, index=get_default_index(marital_options, "married"))
     with c4:
         education = st.selectbox("Education Level:", options=education_options, index=get_default_index(education_options, "secondary"))
 
     st.markdown("#### 2. Financial & Credit Obligations")
-    f1, f2, f3, f4 = st.columns(4)
+    f1, f2 = st.columns(2)
     with f1:
         balance = st.number_input("Average Annual Balance (EUR):", min_value=-10000, max_value=120000, value=1500, step=100)
     with f2:
         default = st.selectbox("Credit in Default?", options=default_options, index=get_default_index(default_options, "no"))
+
+    f3, f4 = st.columns(2)
     with f3:
         housing = st.selectbox("Has Housing Loan?", options=housing_options, index=get_default_index(housing_options, "yes"))
     with f4:
         loan = st.selectbox("Has Personal Loan?", options=loan_options, index=get_default_index(loan_options, "no"))
 
-    st.markdown("#### 3. Campaign & Historical Outreach Context")
-    h1, h2, h3, h4 = st.columns(4)
+    st.markdown("#### 3. Campaign & Outreach Context")
+    h1, h2 = st.columns(2)
     with h1:
         contact = st.selectbox("Contact Communication:", options=contact_options, index=get_default_index(contact_options, "cellular"))
     with h2:
-        day = st.number_input("Last Contact Day (1-31):", min_value=1, max_value=31, value=15, step=1)
-    with h3:
-        month = st.selectbox("Last Contact Month:", options=month_options, index=get_default_index(month_options, "may"))
-    with h4:
         campaign = st.number_input("Campaign Contacts (this campaign):", min_value=1, max_value=70, value=1, step=1)
 
-    h5, h6, h7, h8 = st.columns(4)
+    h3, h4 = st.columns(2)
+    with h3:
+        day = st.number_input("Last Contact Day (1-31):", min_value=1, max_value=31, value=15, step=1)
+    with h4:
+        month = st.selectbox("Last Contact Month:", options=month_options, index=get_default_index(month_options, "may"))
+
+    st.markdown("#### 4. Historical Outreach & Model Selection")
+    h5, h6 = st.columns(2)
     with h5:
-        pdays = st.number_input("Days Since Previous Contact (-1 = never):", min_value=-1, max_value=900, value=-1, step=1)
+        pdays = st.number_input("Days Since Previous Contact (-1 = never contacted):", min_value=-1, max_value=900, value=-1, step=1)
     with h6:
         previous = st.number_input("Previous Contacts Count:", min_value=0, max_value=300, value=0, step=1)
+
+    h7, h8 = st.columns(2)
     with h7:
         poutcome = st.selectbox("Previous Campaign Outcome:", options=poutcome_options, index=get_default_index(poutcome_options, "unknown"))
     with h8:
         model_choice = st.selectbox(
-            "Evaluation Mode:",
+            "Evaluation Mode / Algorithm:",
             options=["all_models", "random_forest", "decision_tree", "logistic_regression", "knn"],
             format_func=lambda x: {
                 "all_models": "🔥 Compare All 4 Models Simultaneously (Consensus)",
