@@ -44,7 +44,7 @@ with down_c1:
     pdf_bytes = fetch_report_pdf_bytes()
     if pdf_bytes:
         st.download_button(
-            label="📄 Download Academic Report (PDF)",
+            label="📄 Academic Report (PDF)",
             data=pdf_bytes,
             file_name="Bank_Marketing_ML_Academic_Report.pdf",
             mime="application/pdf",
@@ -52,24 +52,24 @@ with down_c1:
             width="stretch",
         )
     else:
-        st.button("📄 Academic Report PDF (Pending Generation)", disabled=True, width="stretch")
+        st.button("📄 Academic Report PDF (Pending)", disabled=True, width="stretch")
 
 with down_c2:
     csv_bytes = fetch_metrics_csv_bytes()
     if csv_bytes:
         st.download_button(
-            label="📊 Download Metrics Comparison (CSV)",
+            label="📊 Metrics Comparison (CSV)",
             data=csv_bytes,
             file_name="model_metrics_comparison.csv",
             mime="text/csv",
             width="stretch",
         )
     else:
-        st.button("📊 Metrics CSV (Pending Generation)", disabled=True, width="stretch")
+        st.button("📊 Metrics CSV (Pending)", disabled=True, width="stretch")
 
 with down_c3:
     st.download_button(
-        label="💾 Download Evaluation Summary (JSON)",
+        label="💾 Evaluation Summary (JSON)",
         data=json.dumps(report_data, indent=2),
         file_name="evaluation_summary.json",
         mime="application/json",

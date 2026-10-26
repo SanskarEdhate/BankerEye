@@ -43,11 +43,11 @@ render_info_banner(
 )
 
 # Downloadable Sample Template
-col_up, col_template = st.columns([2.5, 1])
+col_up, col_template = st.columns([1.8, 1.2])
 
 with col_template:
     st.markdown("##### Need a Test CSV?")
-    st.caption("first 25 rows of the dataset")
+    st.caption("First 25 pre-campaign rows")
     sample_records = get_dataset_sample(limit=25)
     if sample_records:
         df_sample_template = pd.DataFrame(sample_records)
@@ -55,7 +55,7 @@ with col_template:
         cols_to_keep = [c for c in df_sample_template.columns if c not in ["y", "duration"]]
         template_csv = df_sample_template[cols_to_keep].to_csv(index=False)
         st.download_button(
-            label="📥 Download Sample Batch Template (CSV)",
+            label="📥 Download Sample CSV",
             data=template_csv,
             file_name="sample_batch_customers.csv",
             mime="text/csv",

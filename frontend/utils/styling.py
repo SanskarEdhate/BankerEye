@@ -816,7 +816,72 @@ def _global_css() -> str:
             flex-direction: column !important;
             gap: 8px !important;
         }
-        div[data-testid="stHorizontalBlock"]:has([data-baseweb="select"]) > div[data-testid="stColumn"] {
+        div[data-testid="stHorizontalBlock"]:has([data-baseweb="select"]) > div[data-testid="stColumn"],
+        div[data-testid="stHorizontalBlock"]:has([data-baseweb="select"]) > .stColumn {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+    }
+
+    /* Responsive Form Inputs: Wrap 4-column form rows into 2x2 grid on medium screens, 1 col on mobile */
+    div[data-testid="stForm"] div[data-testid="stHorizontalBlock"],
+    div[data-testid="stForm"] .stHorizontalBlock {
+        flex-wrap: wrap !important;
+        gap: 12px 10px !important;
+    }
+
+    div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
+    div[data-testid="stForm"] .stHorizontalBlock > .stColumn {
+        min-width: 175px !important;
+    }
+
+    @media (max-width: 1250px) {
+        div[data-testid="stForm"] div[data-testid="stHorizontalBlock"],
+        div[data-testid="stForm"] .stHorizontalBlock {
+            flex-wrap: wrap !important;
+        }
+        div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
+        div[data-testid="stForm"] .stHorizontalBlock > .stColumn {
+            width: calc(50% - 10px) !important;
+            min-width: calc(50% - 10px) !important;
+            max-width: calc(50% - 10px) !important;
+            flex: 1 1 calc(50% - 10px) !important;
+        }
+    }
+
+    @media (max-width: 640px) {
+        div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
+        div[data-testid="stForm"] .stHorizontalBlock > .stColumn {
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+    }
+
+    /* Responsive Batch Upload Row */
+    @media (max-width: 950px) {
+        div[data-testid="stHorizontalBlock"]:has(div[data-testid="stFileUploader"]) {
+            flex-direction: column !important;
+            gap: 16px !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(div[data-testid="stFileUploader"]) > div[data-testid="stColumn"],
+        div[data-testid="stHorizontalBlock"]:has(div[data-testid="stFileUploader"]) > .stColumn {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+    }
+
+    /* Responsive Download Buttons (Reports & Artifacts) */
+    @media (max-width: 950px) {
+        div[data-testid="stHorizontalBlock"]:has(button[data-testid*="downloadButton"], button[kind="primary"]) {
+            flex-direction: column !important;
+            gap: 10px !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(button[data-testid*="downloadButton"], button[kind="primary"]) > div[data-testid="stColumn"],
+        div[data-testid="stHorizontalBlock"]:has(button[data-testid*="downloadButton"], button[kind="primary"]) > .stColumn {
             width: 100% !important;
             max-width: 100% !important;
             flex: 1 1 100% !important;
