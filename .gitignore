@@ -49,3 +49,13 @@ Thumbs.db
 scratch/
 ~$*
 
+# Reports, Screenshots & Generated Export Artifacts
+*.pdf
+*.docx
+*.pptx
+screenshots/
+figures/
+project_report/
+reports/*.pdf
+
+
