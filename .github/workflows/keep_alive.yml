@@ -1,0 +1,29 @@
+name: Keep Streamlit & Backend Awake
+
+on:
+  schedule:
+    # Runs every 12 hours (at 00:00 and 12:00 UTC) to prevent Streamlit 3-day sleep
+    - cron: '0 */12 * * *'
+  workflow_dispatch: # Allows manual one-click trigger from GitHub Actions tab
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Playwright & Headless Chromium
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Execute BankerEye Keep-Alive Bot
+        run: python scripts/keep_alive.py
