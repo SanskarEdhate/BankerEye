@@ -31,15 +31,10 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Health Check
-health = check_api_health()
-if health.get("status") != "healthy":
-    st.error("⚠️ Flask API is offline. Start the backend with: `python backend/app.py`")
-    st.stop()
-
 summary = get_dataset_summary()
 if not summary:
-    st.error("Failed to load dataset summary.")
+    health = check_api_health()
+    st.error("⚠️ Flask API is offline. Start the backend with: `python backend/app.py`")
     st.stop()
 
 # Anti-leakage Highlight Callout

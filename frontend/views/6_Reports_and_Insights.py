@@ -25,15 +25,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# API Health Check
-health = check_api_health()
-if health.get("status") != "healthy":
-    st.error("⚠️ Flask API is offline. Start the backend with: `python backend/app.py`")
-    st.stop()
-
 report_data = get_evaluation_report()
 if not report_data or report_data.get("status") != "success":
-    st.warning("⚠️ Evaluation report is pending. Please train the models first via the Dashboard.")
+    health = check_api_health()
+    if health.get("status") != "healthy":
+        st.error("⚠️ Flask API is offline. Start the backend with: `python backend/app.py`")
+    else:
+        st.warning("⚠️ Evaluation report is pending. Please train the models first via the Dashboard.")
     st.stop()
 
 # Download Bar with cached bytes

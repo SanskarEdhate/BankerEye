@@ -607,6 +607,7 @@ def train_and_evaluate_all_models(
         results["statistical_verdict"] = ci_verdict
         results["is_top_model_distinguishable"] = is_distinguishable
 
+        results["status"] = "ready"
         results["total_training_time_sec"] = round(time.time() - start_total_time, 2)
 
         # Save metrics to disk
@@ -614,6 +615,17 @@ def train_and_evaluate_all_models(
             json.dump(results, f, indent=2)
 
         # Save lightweight evaluation summary
+        models_summary_data = {
+            k: {
+                "display_name": v["display_name"],
+                "metrics": v["metrics"],
+                "bootstrap_ci_95": v["bootstrap_ci_95"],
+                "calibration": v["calibration"],
+                "optimal_threshold": v["optimal_threshold"],
+                "timing": v["timing"],
+            }
+            for k, v in results["models"].items()
+        }
         summary_payload = {
             "status": "ready",
             "trained_at": results["trained_at"],
@@ -621,17 +633,8 @@ def train_and_evaluate_all_models(
             "statistical_verdict": ci_verdict,
             "is_top_model_distinguishable": is_distinguishable,
             "rankings": rankings,
-            "models_summary": {
-                k: {
-                    "display_name": v["display_name"],
-                    "metrics": v["metrics"],
-                    "bootstrap_ci_95": v["bootstrap_ci_95"],
-                    "calibration": v["calibration"],
-                    "optimal_threshold": v["optimal_threshold"],
-                    "timing": v["timing"],
-                }
-                for k, v in results["models"].items()
-            },
+            "models": models_summary_data,
+            "models_summary": models_summary_data,
             "temporal_check": temporal_results,
         }
         with open(summary_file, "w", encoding="utf-8") as f:

@@ -2399,5 +2399,6 @@
   },
   "statistical_verdict": "The 95% confidence intervals for Decision Tree Classifier [0.4468, 0.5011] and Random Forest Classifier [0.4464, 0.4965] overlap. Their performances are not statistically distinguishable on this test set.",
   "is_top_model_distinguishable": false,
-  "total_training_time_sec": 372.61
+  "total_training_time_sec": 372.61,
+  "status": "ready"
 }

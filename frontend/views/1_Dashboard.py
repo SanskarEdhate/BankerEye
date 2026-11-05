@@ -31,20 +31,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# API Status Verification
-health = check_api_health()
-if health.get("status") != "healthy":
+# Load summary & model data (instant local load first)
+summary = get_dataset_summary()
+comparison = get_model_comparison()
+if comparison and not comparison.get("models") and comparison.get("models_summary"):
+    comparison["models"] = comparison["models_summary"]
+
+if not summary:
+    health = check_api_health()
     st.error(
         f"⚠️ Flask Backend API is currently offline. Please start it using: `python backend/app.py`"
     )
-    st.stop()
-
-# Load summary & model data
-summary = get_dataset_summary()
-comparison = get_model_comparison()
-
-if not summary:
-    st.warning("Could not retrieve dataset summary from API.")
     st.stop()
 
 models_trained = comparison and comparison.get("status") == "ready" and bool(comparison.get("models"))

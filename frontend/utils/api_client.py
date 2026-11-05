@@ -114,19 +114,32 @@ def _load_local_dataset_summary() -> Optional[Dict[str, Any]]:
 
 
 def _load_local_model_comparison() -> Optional[Dict[str, Any]]:
-    """Loads benchmark model evaluation summary from local disk in < 1ms."""
+    """Loads benchmark model evaluation metrics from local disk in < 1ms."""
     try:
         from pathlib import Path
         import json
-        eval_path = (
+        saved_dir = (
             Path(__file__).resolve().parent.parent.parent
             / "backend"
             / "saved_models"
-            / "evaluation_summary.json"
         )
+        # 1. Primary: load complete model_metrics.json (54KB, includes full models, curves, CIs, rankings)
+        metrics_path = saved_dir / "model_metrics.json"
+        if metrics_path.exists():
+            with open(metrics_path, "r", encoding="utf-8") as f:
+                raw_metrics = json.load(f)
+            raw_metrics["status"] = "ready"
+            raw_metrics["is_fallback"] = True
+            return raw_metrics
+
+        # 2. Secondary fallback: evaluation_summary.json (ensure models key is populated)
+        eval_path = saved_dir / "evaluation_summary.json"
         if eval_path.exists():
             with open(eval_path, "r", encoding="utf-8") as f:
                 raw_eval = json.load(f)
+            raw_eval["status"] = "ready"
+            if "models" not in raw_eval and "models_summary" in raw_eval:
+                raw_eval["models"] = raw_eval["models_summary"]
             raw_eval["is_fallback"] = True
             return raw_eval
     except Exception as ex:
@@ -294,7 +307,7 @@ def get_model_comparison() -> Optional[Dict[str, Any]]:
     """Retrieves model metrics and comparison data (instant local benchmark first, no spinner)."""
     # 1. Instant local load (< 1ms) so home & comparison render immediately
     local_eval = _load_local_model_comparison()
-    if local_eval:
+    if local_eval and local_eval.get("models"):
         return local_eval
 
     # 2. Network fallback if running outside repo structure
@@ -305,7 +318,7 @@ def get_model_comparison() -> Optional[Dict[str, Any]]:
     except requests.exceptions.RequestException as e:
         logger.warning(f"Live API model comparison unavailable: {e}.")
 
-    return None
+    return local_eval
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
@@ -358,7 +371,39 @@ def predict_batch_csv(df: pd.DataFrame, model_name: str) -> Dict[str, Any]:
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def get_evaluation_report() -> Optional[Dict[str, Any]]:
-    """Retrieves structured evaluation report (cached for 1h, no spinner)."""
+    """Retrieves structured evaluation report (instant local benchmark first, no spinner)."""
+    try:
+        from pathlib import Path
+        import json
+        metrics_path = Path(__file__).resolve().parent.parent.parent / "backend" / "saved_models" / "model_metrics.json"
+        if metrics_path.exists():
+            with open(metrics_path, "r", encoding="utf-8") as f:
+                metrics = json.load(f)
+            lit_json_path = Path(__file__).resolve().parent.parent.parent / "reports" / "literature_data.json"
+            lit_papers = []
+            if lit_json_path.exists():
+                try:
+                    with open(lit_json_path, "r", encoding="utf-8") as f:
+                        lit_papers = json.load(f)
+                except Exception:
+                    pass
+            return {
+                "status": "success",
+                "title": "Bank Marketing Subscription Prediction - Evaluation Report",
+                "report_generated_at": metrics.get("trained_at"),
+                "dataset": metrics.get("dataset_info"),
+                "experimental_split": metrics.get("split_info"),
+                "models": metrics.get("models"),
+                "rankings": metrics.get("rankings"),
+                "statistical_verdict": metrics.get("statistical_verdict"),
+                "is_top_model_distinguishable": metrics.get("is_top_model_distinguishable"),
+                "temporal_check": metrics.get("temporal_check"),
+                "literature_review": lit_papers,
+                "is_fallback": True,
+            }
+    except Exception as ex:
+        logger.warning(f"Local evaluation report load failed: {ex}")
+
     try:
         res = requests.get(f"{get_base_url()}/api/reports/evaluation", timeout=DEFAULT_TIMEOUT)
         if res.status_code == 200:
@@ -382,6 +427,14 @@ def download_report_pdf_url() -> str:
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_metrics_csv_bytes() -> Optional[bytes]:
     """Fetches and caches the metrics CSV content bytes for instant in-app download."""
+    try:
+        from backend.services.report_service import generate_metrics_csv
+        local_csv = generate_metrics_csv()
+        if local_csv:
+            return local_csv.encode("utf-8")
+    except Exception:
+        pass
+
     try:
         res = requests.get(f"{get_base_url()}/api/reports/metrics-csv", timeout=DEFAULT_TIMEOUT)
         if res.status_code == 200:

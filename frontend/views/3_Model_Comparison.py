@@ -34,15 +34,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-health = check_api_health()
-if health.get("status") != "healthy":
-    st.error("⚠️ Flask API is offline. Start the backend with: `python backend/app.py`")
-    st.stop()
-
 comparison = get_model_comparison()
+if comparison and not comparison.get("models") and comparison.get("models_summary"):
+    comparison["models"] = comparison["models_summary"]
+
 models_ready = comparison and comparison.get("status") == "ready" and bool(comparison.get("models"))
 
 if not models_ready:
+    health = check_api_health()
+    if health.get("status") != "healthy":
+        st.error("⚠️ Flask API is offline. Start the backend with: `python backend/app.py`")
+        st.stop()
     st.info("Models have not been trained yet. Click below to train Logistic Regression, Decision Tree, KNN, and Random Forest.")
     if st.button("🚀 Train All 4 Models", type="primary", width="stretch"):
         resp = trigger_model_training()
